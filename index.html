@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>3日間のお世話ゲーム（改良版）</title>
   <style>
     :root{
@@ -12,580 +12,139 @@
       --text:#eef2ff;
       --muted:rgba(238,242,255,.72);
       --line:rgba(255,255,255,.14);
-      --shadow: 0 14px 40px rgba(0,0,0,.35);
-      --radius: 18px;
+      --shadow:0 14px 40px rgba(0,0,0,.35);
+      --radius:18px;
       --success:#b9f6ca;
       --warn:#ffd6a5;
+      --accent1:#c4b5fd;
+      --accent2:#93c5fd;
+      --danger:#fda4af;
     }
-    *{box-sizing:border-box;}
+    *{box-sizing:border-box}
     body{
       margin:0;
       color:var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
       background:
-        linear-gradient(180deg, rgba(5,8,22,.55), rgba(11,16,40,.70)),
-        url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpi2r9//38gYGAEEWAAEhADf0o/1fAAAAAASUVORK5CYII=") center/cover no-repeat fixed;
+        radial-gradient(1200px 700px at 60% 10%, rgba(196,181,253,.11), transparent 60%),
+        radial-gradient(900px 600px at 15% 80%, rgba(147,197,253,.11), transparent 60%),
+        linear-gradient(180deg, rgba(5,8,22,.95), rgba(11,16,40,.96));
       min-height:100vh;
       overflow-x:hidden;
     }
-
-    .wrap{max-width: 1100px; margin:0 auto; padding: 18px 14px 40px;}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 40px}
     .topbar{
-      display:flex; gap:12px; align-items:center; justify-content:space-between;
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      position: sticky; top: 10px;
-      backdrop-filter: blur(10px);
-      z-index: 20;
-      flex-wrap: wrap;
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05);
+      border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:10px;z-index:20;
+      backdrop-filter:blur(10px)
     }
-    .brand{display:flex; gap:10px; align-items:center;}
+    .brand{display:flex;gap:10px;align-items:center}
     .brand .dot{
       width:12px;height:12px;border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.1)),
-                  linear-gradient(180deg, #c4b5fd, #93c5fd);
-      box-shadow: 0 0 18px rgba(196,181,253,.35);
+      background:linear-gradient(180deg,var(--accent1),var(--accent2));
+      box-shadow:0 0 18px rgba(196,181,253,.35)
     }
-    .brand .title{font-weight: 750; letter-spacing:.02em; font-size: 14px; line-height: 1.2;}
-    .brand .sub{font-size: 12px; color: var(--muted); margin-top: 2px;}
-    
-    .statusRow{display:flex; gap: 10px; align-items:center; justify-content:flex-end; flex: 1; flex-wrap: wrap;}
-    .countdown{
-      display:flex; align-items:center; gap:8px;
-      padding: 8px 12px;
-      border: 1px solid rgba(147,197,253,.3);
-      background: rgba(147,197,253,.1);
-      border-radius: 999px;
-      min-height: 34px;
-      font-weight: 600;
-      font-size: 13px;
+    .brand .title{font-weight:800;font-size:14px}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .statusRow{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex:1;flex-wrap:wrap}
+    .pill,.countdown{
+      display:flex;align-items:center;gap:8px;min-height:34px;padding:8px 10px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.05);position:relative
     }
-    .countdown .icon{
-      width:16px;height:16px;
-      background: linear-gradient(45deg, rgba(147,197,253,.9), rgba(196,181,253,.9));
-      border-radius: 999px;
-      display: inline-block;
-      animation: pulse 1.6s ease-in-out infinite;
-    }
-    @keyframes pulse{
-      0%,100%{opacity:.6; transform:scale(1);}
-      50%{opacity:1; transform:scale(1.1);}
-    }
-    
-    .pill{
-      display:flex; align-items:center; gap:8px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      border-radius: 999px;
-      min-height: 34px;
-      position: relative;
-    }
-    .pill small{color: var(--muted);}
-
-    .heartIcon{
-      width:16px;height:16px; display:inline-block;
-      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.1)),
-                  linear-gradient(180deg, rgba(251,113,133,.95), rgba(196,181,253,.85));
-      clip-path: path("M8 14s6-3.3 6-7.2C14 4.6 12.8 3 10.8 3 9.6 3 8.7 3.7 8 4.6 7.3 3.7 6.4 3 5.2 3 3.2 3 2 4.6 2 6.8 2 10.7 8 14 8 14Z");
-      opacity:.95;
-    }
-    .hearts{
-      width: 140px; height: 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.08);
-      overflow:hidden;
-    }
-    .hearts > i{
-      // 修正後:
-function buildReturnUrl(){
-  const u = new URL(location.href);
-  u.hash = "";
-  u.pathname = u.pathname.replace(/survey\.html$/,"index_improved.html");
-  u.searchParams.set("done","1");
-  return u.toString();
-}
-      display:block; height:100%; width:50%;
-      background: linear-gradient(90deg, rgba(196,181,253,.95), rgba(147,197,253,.95));
-      box-shadow: 0 0 14px rgba(147,197,253,.25);
-      transition: width .3s ease;
-    }
-
-    .langSel{
-      appearance:none;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      color: rgba(238,242,255,.92);
-      border-radius: 12px;
-      padding: 8px 28px 8px 10px;
-      font-weight: 700;
-      cursor: pointer;
-      outline: none;
-      line-height: 1;
-    }
-    .langSel option{background:#0b1028; color:#eef2ff;}
-    .pill[title="Language"]::after{
-      content:"▾";
-      position:absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(238,242,255,.72);
-      pointer-events:none;
-      font-size: 12px;
-    }
-
-    .toggle{display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;}
-    .switch{
-      width:42px;height:24px;border-radius:999px;
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.08);
-      position: relative;
-      transition: .18s ease;
-    }
-    .switch::after{
-      content:"";
-      width:18px;height:18px;border-radius:999px;
-      position:absolute; top:2px; left:2px;
-      background: rgba(255,255,255,.85);
-      box-shadow: 0 8px 14px rgba(0,0,0,.25);
-      transition: .18s ease;
-    }
-    .toggle[data-on="true"] .switch{
-      background: rgba(154,230,180,.18);
-      border-color: rgba(154,230,180,.28);
-    }
-    .toggle[data-on="true"] .switch::after{
-      left: 20px;
-      background: rgba(154,230,180,.95);
-    }
-
-    .main{margin-top: 14px; display:grid; grid-template-columns: 1.5fr 1fr; gap: 14px; align-items:start;}
-    @media (max-width: 900px){
-      .main{grid-template-columns: 1fr;}
-    }
-    
-    .card{
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .cardHeader{
-      padding: 12px 12px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      display:flex; align-items:center; justify-content:space-between; gap: 10px;
-      flex-wrap: wrap;
-    }
-    .cardHeader .h{font-weight: 800; font-size: 14px;}
-    .cardHeader .hint{font-size:12px;color:var(--muted); margin-top: 2px;}
-    .btnRow{display:flex; gap: 10px; flex-wrap: wrap;}
-
+    .countdown{border-color:rgba(147,197,253,.3);background:rgba(147,197,253,.1);font-size:13px;font-weight:700}
+    .countdown .icon{width:16px;height:16px;border-radius:999px;background:linear-gradient(45deg,var(--accent2),var(--accent1));animation:pulse 1.6s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+    .heartIcon{font-size:15px;line-height:1}
+    .hearts{width:140px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);overflow:hidden}
+    .hearts > i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .25s ease}
+    .toggle{cursor:pointer;user-select:none}
+    .switch{width:42px;height:24px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);position:relative;transition:.18s ease}
+    .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.85);box-shadow:0 8px 14px rgba(0,0,0,.25);transition:.18s ease}
+    .toggle[data-on="true"] .switch{background:rgba(154,230,180,.18);border-color:rgba(154,230,180,.28)}
+    .toggle[data-on="true"] .switch::after{left:20px;background:rgba(154,230,180,.95)}
+    .main{margin-top:14px;display:grid;grid-template-columns:1.5fr 1fr;gap:14px;align-items:start}
+    @media (max-width:900px){.main{grid-template-columns:1fr}}
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .cardHeader{padding:12px 12px 10px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .cardHeader .h{font-weight:800;font-size:14px}
+    .cardHeader .hint{font-size:12px;color:var(--muted);margin-top:2px}
+    .cardContent{padding:12px}
     button{
-      appearance:none;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 12px 10px;
-      cursor:pointer;
-      font-weight: 650;
-      letter-spacing:.01em;
-      box-shadow: 0 12px 26px rgba(0,0,0,.22);
-      transition: transform .08s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);
+      border-radius:14px;padding:12px 10px;cursor:pointer;font-weight:700;letter-spacing:.01em;
+      box-shadow:0 12px 26px rgba(0,0,0,.22);transition:transform .08s ease,background .18s ease,border-color .18s ease,opacity .18s ease
     }
-    button:hover{transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22);}
-    button:active{transform: translateY(0px) scale(.99);}
-    button[disabled]{opacity:.45; cursor:not-allowed; transform:none;}
-    .btnGhost{background: rgba(255,255,255,.03); padding: 10px 10px;}
-    .grid{display:grid; grid-template-columns: 1fr 1fr; gap: 10px;}
-    @media (max-width: 600px){
-      .grid{grid-template-columns: 1fr;}
-    }
-
-    /* 改良：2択ボタンのUI */
-    .choiceGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 8px 0;
-    }
+    button:hover{transform:translateY(-1px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
+    button:active{transform:translateY(0) scale(.99)}
+    button[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+    .btnGhost{background:rgba(255,255,255,.03)}
+    .choiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
     .choiceBtn{
-      display:flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 16px 12px !important;
-      min-height: 80px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.06) !important;
-      border: 1.5px solid rgba(255,255,255,.14) !important;
-      transition: all .2s ease;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:86px;
+      padding:16px 12px!important;border-radius:16px;background:rgba(255,255,255,.06)!important;border:1.5px solid rgba(255,255,255,.14)!important
     }
-    .choiceBtn:hover{
-      background: rgba(255,255,255,.12) !important;
-      border-color: rgba(255,255,255,.28) !important;
-      transform: translateY(-2px);
+    .choiceBtn .icon{font-size:32px;line-height:1}
+    .choiceBtn .label{font-size:13px;font-weight:800;text-align:center;line-height:1.3}
+    .choiceBtn .sub{font-size:11px;color:var(--muted);text-align:center}
+    .stage{position:relative;min-height:540px;padding:14px;overflow:hidden}
+    .stars{position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:
+      radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+      radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 85% 75%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 25% 50%, rgba(255,255,255,.55) 0 1px, transparent 2px);
+      background-size:420px 260px;animation:drift 18s linear infinite}
+    @keyframes drift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-80px,50px,0)}}
+    .center{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;z-index:10}
+    .entity{width:280px;height:280px;display:grid;place-items:center;position:relative}
+    .floaty{animation:floaty 2.8s ease-in-out infinite}
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .entityBubble{position:absolute;top:-6px;right:6px;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:12px;color:var(--muted);backdrop-filter:blur(8px)}
+    .entityImg{width:250px;height:250px;object-fit:contain;filter:drop-shadow(0 18px 26px rgba(0,0,0,.35))}
+    .sleepStatus{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(11,16,40,.92);color:var(--text);box-shadow:var(--shadow);z-index:110;display:none}
+    .toast.show{display:block;animation:toastIn .25s ease}
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    .modalOverlay,.surveyGate,.poopGameContainer,.endingScreen{
+      position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);display:none;place-items:center;z-index:100
     }
-    .choiceBtn .icon{
-      font-size: 32px;
-      line-height: 1;
-    }
-    .choiceBtn .label{
-      font-size: 13px;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.3;
-    }
-    .choiceBtn .sub{
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    /* ふ化アニメーション */
-    .hatchAnimation{
-      animation: hatchBurst .8s ease-out forwards;
-    }
-    @keyframes hatchBurst{
-      0%{
-        opacity: 1;
-        transform: scale(1);
-      }
-      30%{
-        opacity: 1;
-        transform: scale(1.1) rotate(2deg);
-      }
-      60%{
-        opacity: 1;
-        transform: scale(0.9);
-      }
-      100%{
-        opacity: 0;
-        transform: scale(0);
-      }
-    }
-    
-    .charAppear{
-      animation: charPop .6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    @keyframes charPop{
-      0%{
-        opacity: 0;
-        transform: scale(0) translateY(20px);
-      }
-      100%{
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .stage{
-      position: relative;
-      min-height: 520px;
-      padding: 14px;
-    }
-    .sky{position:absolute; inset:0; pointer-events:none;
-      background:
-        radial-gradient(1200px 700px at 60% 10%, rgba(196,181,253,.10), transparent 60%),
-        radial-gradient(900px 600px at 15% 80%, rgba(147,197,253,.10), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,0));
-    }
-    .stars{
-      position:absolute; inset:0; pointer-events:none; opacity:.55;
-      background-image:
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 2px),
-        radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-        radial-gradient(circle at 70% 30%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-        radial-gradient(circle at 85% 75%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-        radial-gradient(circle at 25% 50%, rgba(255,255,255,.55) 0 1px, transparent 2px);
-      background-size: 420px 260px;
-      filter: blur(.2px);
-      animation: drift 18s linear infinite;
-    }
-    @keyframes drift{
-      0%{transform: translate3d(0,0,0);}
-      100%{transform: translate3d(-80px, 50px, 0);}
-    }
-    .center{
-      position:absolute;
-      left:50%;
-      top: 55%;
-      transform: translate(-50%,-50%);
-      width: 100%;
-      max-width: 560px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap: 12px;
-      padding: 12px;
-      z-index: 10;
-    }
-    .entity{
-      width: 280px;
-      height: 280px;
-      display:grid;
-      place-items:center;
-      position: relative;
-    }
-    .floaty{animation: floaty 2.6s ease-in-out infinite;}
-    @keyframes floaty{
-      0%,100%{transform: translateY(0);}
-      50%{transform: translateY(-10px);}
-    }
-
-    .macaronWrap{width: 260px; height: 260px; display:grid; place-items:center; position: relative;}
-    .macaronImg{
-      width: 210px; height: 210px; object-fit: contain;
-      filter: drop-shadow(0 18px 26px rgba(0,0,0,.35));
-      opacity: .98;
-    }
-    .hatchLift{animation: hatchLift 1.6s ease-in-out 1 forwards;}
-    @keyframes hatchLift{
-      0%{transform: translateY(0) scale(1); opacity: 1;}
-      60%{transform: translateY(-26px) scale(1.02); opacity: 1;}
-      100%{transform: translateY(-60px) scale(.95); opacity: 0;}
-    }
-
-    .charWrap{
-      width: 260px; height: 260px;
-      display:grid; place-items:center;
-      position: relative;
-      filter: drop-shadow(0 18px 26px rgba(0,0,0,.35));
-    }
-    .charScaleBox{
-      width: 100%;
-      height: 100%;
-      display:grid;
-      place-items:center;
-      transform-origin: 50% 55%;
-      transition: transform .25s ease;
-    }
-    .charImg{
-      width: 230px; height: 230px; object-fit: contain; opacity: .98; transition: .18s ease;
-    }
-
-    /* 改良：起きている時間を増やすためのインジケータ */
-    .sleepStatus{
-      position: absolute;
-      bottom: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .sleepStatus.tired{color: var(--warn);}
-    .sleepStatus.resting{color: var(--success);}
-
-    .cardContent{padding: 12px;}
-
-    /* モーダル */
-    .modalOverlay{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(4px);
-      display:grid;
-      place-items:center;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      animation: fadeIn .2s ease forwards;
-    }
-    @keyframes fadeIn{to{opacity:1; pointer-events:auto;}}
+    .modalOverlay.show,.surveyGate.show,.endingScreen.show{display:grid}
+    .poopGameContainer.show{display:flex}
     .modalBox{
-      background: rgba(11,16,40,.95);
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 20px;
-      padding: 24px;
-      max-width: 500px;
-      width: 90vw;
-      max-height: 80vh;
-      overflow: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,.5);
-      animation: slideUp .25s ease;
+      background:rgba(11,16,40,.96);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;
+      max-width:560px;width:min(92vw,560px);max-height:84vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)
     }
-    @keyframes slideUp{
-      from{transform: translateY(20px); opacity: 0;}
-      to{transform: translateY(0); opacity: 1;}
-    }
-    .modalBox h2{margin-top: 0; margin-bottom: 12px; font-size: 18px;}
-    .modalBox small{display: block; margin-bottom: 16px; color: var(--muted); line-height: 1.6;}
-    .modalBtn{display:flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;}
-    .modalBtn button{flex: 1; min-width: 120px;}
-
-    /* 改良：死亡後の同一性選択画面 */
-    .identityChoice{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin: 20px 0;
-    }
-    .identityOption{
-      border: 1.5px solid rgba(255,255,255,.14);
-      border-radius: 16px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all .2s ease;
-      text-align: center;
-    }
-    .identityOption:hover{
-      border-color: rgba(255,255,255,.3);
-      background: rgba(255,255,255,.08);
-    }
-    .identityOption .icon{
-      font-size: 40px;
-      margin-bottom: 8px;
-    }
-    .identityOption .label{
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-    .identityOption .desc{
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    /* 改良：カウントダウン画面 */
-    .countdownScreen{
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(5,8,22,.95), rgba(11,16,40,.95));
-      z-index: 50;
-      display:none;
-      place-items:center;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .countdownScreen.show{display:flex;}
-    .countdownScreen .day{
-      font-size: 64px;
-      font-weight: 900;
-      background: linear-gradient(180deg, rgba(196,181,253,.95), rgba(147,197,253,.95));
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      line-height: 1;
-    }
-    .countdownScreen .label{
-      font-size: 18px;
-      color: var(--text);
-      font-weight: 600;
-    }
-    .countdownScreen .time{
-      font-size: 24px;
-      color: var(--muted);
-      font-family: ui-monospace, monospace;
-    }
-    .countdownScreen .remaining{
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 20px;
-    }
-
-    /* 改良：💩ゲーム用スタイル */
-    .poopGameContainer{
-      display:none;
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
-      z-index: 60;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
-    .poopGameContainer.show{display:flex;}
-    .poopGameTitle{
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--text);
-    }
-    .poopGameArea{
-      width: 320px;
-      height: 320px;
-      border: 2px solid rgba(255,255,255,.2);
-      border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      position: relative;
-      overflow: hidden;
-    }
-    .poop{
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      background: #8B7355;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all .1s ease;
-      user-select: none;
-      animation: poopBounce .6s ease-out;
-    }
-    @keyframes poopBounce{
-      0%{transform: scale(0); opacity: 1;}
-      50%{transform: scale(1.1);}
-      100%{transform: scale(1);}
-    }
-    .poop:hover{transform: scale(1.15);}
-    .poopScore{
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text);
-    }
-    .poopHint{
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* 改良：アンケートゲート */
-    .surveyGate{
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
-      z-index: 40;
-      display:flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 20px;
-      padding: 20px;
-      text-align: center;
-    }
-    .surveyGate.hidden{display:none;}
-    .surveyGate .icon{
-      font-size: 60px;
-      margin-bottom: 10px;
-      animation: bounce 1.2s ease infinite;
-    }
-    @keyframes bounce{
-      0%,100%{transform: translateY(0);}
-      50%{transform: translateY(-10px);}
-    }
-    .surveyGate .title{
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-    .surveyGate .desc{
-      color: var(--muted);
-      line-height: 1.6;
-      max-width: 400px;
-      margin-bottom: 20px;
-    }
-    .surveyGate button{
-      min-width: 200px;
-      padding: 14px 20px;
-      font-size: 14px;
-    }
+    .modalBox h2{margin:0 0 8px;font-size:18px}
+    .modalBox p,.modalBox small{color:var(--muted);line-height:1.7}
+    .modalBtn{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .modalBtn button{flex:1;min-width:140px}
+    .pairCard{margin-top:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+    .pairProgress{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .pairTitle{font-size:16px;font-weight:800;margin-bottom:12px}
+    .pairBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .choiceModalBtn{min-height:86px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .historyHint{font-size:12px;color:var(--muted);margin-top:12px}
+    .poopGameContainer{flex-direction:column;align-items:center;justify-content:center;gap:20px;background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:120}
+    .poopGameTitle{font-size:32px;font-weight:900}
+    .poopGameArea{width:320px;height:320px;border:2px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.03);position:relative;overflow:hidden}
+    .poop{position:absolute;width:42px;height:42px;display:grid;place-items:center;font-size:28px;cursor:pointer;user-select:none;animation:poopBounce .6s ease-out}
+    @keyframes poopBounce{0%{transform:scale(0);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+    .poop:hover{transform:scale(1.14)}
+    .poopScore{font-size:24px;font-weight:800}
+    .poopHint{font-size:12px;color:var(--muted)}
+    .surveyGate{background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:90}
+    .surveyPanel{width:min(92vw,520px);padding:28px;border-radius:24px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);text-align:center;box-shadow:var(--shadow)}
+    .surveyPanel .icon{font-size:58px;margin-bottom:10px;animation:bounce 1.2s ease infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .surveyPanel .title{font-size:24px;font-weight:900;margin-bottom:10px}
+    .surveyPanel .desc{color:var(--muted);line-height:1.7;margin-bottom:18px}
+    .endingScreen .thanks{font-size:42px;font-weight:900;letter-spacing:.08em}
+    .endingScreen .sub{margin-top:12px;color:var(--muted);text-align:center;line-height:1.8}
+    .logList{display:flex;flex-direction:column;gap:12px}
+    .logDay{padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.03)}
+    .logDay h3{margin:0 0 8px;font-size:14px}
+    .logDay ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.7}
   </style>
 </head>
 <body>
@@ -604,7 +163,7 @@ function buildReturnUrl(){
         <span id="countdownText">計測中...</span>
       </div>
       <div class="pill">
-        <span class="heartIcon"></span>
+        <span class="heartIcon">💗</span>
         <div class="hearts"><i id="heartFill"></i></div>
         <small id="heartVal">?/10</small>
       </div>
@@ -625,18 +184,11 @@ function buildReturnUrl(){
       </div>
       <div class="cardContent" style="position:relative; min-height:560px; padding:0;">
         <div class="stage">
-          <div class="sky"></div>
           <div class="stars"></div>
           <div class="center">
             <div class="entity floaty">
-              <div class="macaronWrap" id="macaronWrap" style="display:none;">
-                <img id="macaronImg" class="macaronImg" src="" alt="macaron">
-              </div>
-              <div class="charWrap" id="charWrap" style="display:none;">
-                <div class="charScaleBox" id="charScaleBox">
-                  <img id="charImg" class="charImg" src="" alt="char">
-                </div>
-              </div>
+              <div class="entityBubble" id="entityBubble">まってる</div>
+              <img id="entityImg" class="entityImg" alt="character">
               <div class="sleepStatus" id="sleepStatus"></div>
             </div>
           </div>
@@ -648,23 +200,24 @@ function buildReturnUrl(){
       <div class="cardHeader">
         <div>
           <div class="h">コマンド</div>
-          <div class="hint">タップして対応する</div>
+          <div class="hint">ごはんは20種類の2択を順番に出します</div>
         </div>
         <button style="width:auto; padding:8px 10px; font-size:11px;" id="btnLetter">💌 手紙を読む</button>
       </div>
       <div class="cardContent">
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <!-- 改良：2択ボタンをより分かりやすく -->
           <div>
             <small style="color:var(--muted); display:block; margin-bottom:4px;">ごはん</small>
             <div class="choiceGrid">
               <button class="choiceBtn" id="btnFood">
                 <span class="icon">🍚</span>
                 <span class="label">ごはん</span>
+                <span class="sub">20この2たく</span>
               </button>
               <button class="choiceBtn" id="btnOut">
                 <span class="icon">🌳</span>
                 <span class="label">おでかけ</span>
+                <span class="sub">2たく</span>
               </button>
             </div>
           </div>
@@ -675,10 +228,12 @@ function buildReturnUrl(){
               <button class="choiceBtn" id="btnStyle">
                 <span class="icon">✨</span>
                 <span class="label">スタイル</span>
+                <span class="sub">2たく</span>
               </button>
               <button class="choiceBtn" id="btnDrink">
                 <span class="icon">🧃</span>
                 <span class="label">ドリンク</span>
+                <span class="sub">少し元気</span>
               </button>
             </div>
           </div>
@@ -689,10 +244,12 @@ function buildReturnUrl(){
               <button class="choiceBtn" id="btnClean">
                 <span class="icon">🧹</span>
                 <span class="label">そうじ</span>
+                <span class="sub">💩ゲーム</span>
               </button>
               <button class="choiceBtn" id="btnMacaron">
                 <span class="icon">🍪</span>
                 <span class="label">マカロン</span>
+                <span class="sub">少し回復</span>
               </button>
             </div>
           </div>
@@ -710,76 +267,131 @@ function buildReturnUrl(){
   </div>
 </div>
 
-<!-- 改良：カウントダウン画面 -->
-<div class="countdownScreen" id="countdownScreen">
-  <div class="day" id="countdownDay">1</div>
-  <div class="label">開始</div>
-  <div class="time" id="countdownTime">準備中...</div>
-  <div class="remaining" id="countdownRemaining">まもなくゲーム開始</div>
+<div class="surveyGate" id="surveyGate">
+  <div class="surveyPanel">
+    <div class="icon">📋</div>
+    <div class="title">ゲーム開始前に</div>
+    <div class="desc">アンケートに進むと、そのまま回答してこの画面へ戻れます。<br>戻ったあとも今の状態は消えません。</div>
+    <button id="btnGoSurvey" style="width:100%; margin-bottom:10px;">アンケートへ進む</button>
+    <button id="btnSkipSurvey" class="btnGhost" style="width:100%;">あとで</button>
+  </div>
 </div>
 
-<!-- 改良：💩ゲーム -->
+<div class="modalOverlay" id="choiceModal">
+  <div class="modalBox">
+    <h2 id="choiceModalTitle">2択</h2>
+    <small id="choiceModalDesc">どちらかを選ぶ</small>
+    <div class="pairCard">
+      <div class="pairProgress" id="choiceProgress">1 / 20</div>
+      <div class="pairTitle" id="choiceQuestion">どっちにする？</div>
+      <div class="pairBtns">
+        <button class="choiceModalBtn" id="choiceLeft">左</button>
+        <button class="choiceModalBtn" id="choiceRight">右</button>
+      </div>
+    </div>
+    <div class="historyHint" id="choiceHint">選ぶたびに次の2択へ進みます。</div>
+    <div class="modalBtn">
+      <button class="btnGhost" id="btnChoiceClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalOverlay" id="letterModal">
+  <div class="modalBox">
+    <h2>💌 お手紙</h2>
+    <div style="background:rgba(255,255,255,.05); border-radius:12px; padding:16px; margin:16px 0; line-height:1.8; white-space:pre-wrap; font-size:13px; color:var(--muted);" id="letterContent"></div>
+    <button style="width:100%; margin-top:16px;" id="btnLetterClose">手紙を閉じる</button>
+  </div>
+</div>
+
+<div class="modalOverlay" id="logsModal">
+  <div class="modalBox">
+    <h2>3日間の記録</h2>
+    <div class="logList" id="logsContent"></div>
+    <div class="modalBtn">
+      <button id="btnLogsClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="poopGameContainer" id="poopGame">
   <div class="poopGameTitle">そうじ</div>
   <div class="poopGameArea" id="poopGameArea"></div>
   <div class="poopScore" id="poopScore">0 / 5</div>
-  <div class="poopHint">💩をタップしてきれいにしよう！</div>
-  <button id="btnPoopExit" style="margin-top:10px;">終わる</button>
+  <div class="poopHint">💩をタップしてきれいにしよう</div>
+  <button id="btnPoopExit">終わる</button>
 </div>
 
-<!-- 改良：アンケートゲート -->
-<div class="surveyGate" id="surveyGate">
-  <div class="icon">📋</div>
-  <div class="title">ゲーム開始前に</div>
-  <div class="desc">アンケートにご協力ください。<br>survey.html にアクセスしてください。</div>
-  <button id="btnGoSurvey">アンケートを開く</button>
-  <button class="btnGhost" id="btnSkipSurvey" style="margin-top:0;">スキップ</button>
-</div>
-
-<!-- 改良：死後の同一性選択画面 -->
-<div class="modalOverlay" id="endingModal" style="display:none;">
-  <div class="modalBox">
-    <h2>お別れの時</h2>
-    <small>このキャラの記録をどのように残しますか？</small>
-    
-    <div class="identityChoice">
-      <div class="identityOption" id="chooseLog">
-        <div class="icon">📖</div>
-        <div class="label">ログを見る</div>
-        <div class="desc">3日間の出来事を振り返る</div>
-      </div>
-      <div class="identityOption" id="chooseShape">
-        <div class="icon">🎨</div>
-        <div class="label">容姿を保存</div>
-        <div class="desc">最後の姿を記録する</div>
-      </div>
+<div class="endingScreen" id="endingScreen">
+  <div class="modalBox" style="text-align:center;">
+    <div class="thanks">ありがとう</div>
+    <div class="sub">3日間の記録だけが、静かに残ります。</div>
+    <div class="modalBtn">
+      <button id="btnEndingLogs">ログを見る</button>
+      <button class="btnGhost" id="btnEndingClose">閉じる</button>
     </div>
   </div>
 </div>
 
-<!-- 手紙モーダル -->
-<div class="modalOverlay" id="letterModal" style="display:none;">
-  <div class="modalBox">
-    <h2>💌 お手紙</h2>
-    <div style="background:rgba(255,255,255,.05); border-radius:12px; padding:16px; margin:16px 0; line-height:1.8; white-space:pre-wrap; font-size:13px; color:var(--muted);" id="letterContent">
-    </div>
-    <button style="width:100%; margin-top:16px;" id="btnLetterClose">手紙を閉じる</button>
-  </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
 (() => {
   "use strict";
 
-  // ===== 設定 =====
-  const SAVE_KEY = "tosewa_save_v1";
+  const SAVE_KEY = "tosewa_save_v2";
   const SURVEY_DONE_KEY = "osewa_survey_done_v1";
   const SURVEY_DONE_AT = "osewa_survey_done_at_v1";
-  const IDLE_SLEEP_AFTER_MS = 120000; // 2分→6分に改良（起きている時間増加）
-  const DAY_LENGTH_MS = 3600000; // 1時間=1日
-  const POOP_COUNT_TARGET = 5; // 💩ゲームの目標数
-  
-  // ===== UI要素 =====
+  const SURVEY_ANSWERS_KEY = "osewa_survey_answers_v1";
+
+  const HATCH_MS = 10000;
+  const DAY_LENGTH_MS = 3600000;
+  const TOTAL_DAYS = 3;
+  const IDLE_SLEEP_AFTER_MS = 120000;
+  const SLEEP_MS = 30000;
+  const POOP_COUNT_TARGET = 5;
+
+  const FOOD_CHOICES = [
+    ["ごはん", "パン"],
+    ["みそしる", "スープ"],
+    ["りんご", "バナナ"],
+    ["おにぎり", "サンドイッチ"],
+    ["おちゃ", "ジュース"],
+    ["うどん", "パスタ"],
+    ["いちご", "ぶどう"],
+    ["クッキー", "ビスケット"],
+    ["オムライス", "カレー"],
+    ["プリン", "ゼリー"],
+    ["コーンスープ", "ポタージュ"],
+    ["ミルク", "ヨーグルト"],
+    ["さかな", "おにく"],
+    ["たまごやき", "ハム"],
+    ["チーズ", "バター"],
+    ["ホットケーキ", "ワッフル"],
+    ["マカロン", "マシュマロ"],
+    ["トマト", "にんじん"],
+    ["ラーメン", "やきそば"],
+    ["おもち", "どらやき"]
+  ];
+
+  const OUT_CHOICES = [
+    ["外に出る", "家で過ごす"],
+    ["星を見る", "音を聞く"],
+    ["さんぽ", "ごろごろ"],
+    ["ひなたぼっこ", "日かげで休む"],
+    ["遠くへ行く", "近くで遊ぶ"],
+    ["ひとりで歩く", "いっしょに歩く"]
+  ];
+
+  const STYLE_CHOICES = [
+    ["ぼうし", "りぼん"],
+    ["キラキラ", "ふわふわ"],
+    ["青い飾り", "紫の飾り"],
+    ["ほし模様", "月模様"],
+    ["まるい感じ", "すっとした感じ"],
+    ["やわらかい光", "つよい光"]
+  ];
+
   const ui = {
     dayNum: document.getElementById("dayNum"),
     countdownText: document.getElementById("countdownText"),
@@ -787,13 +399,10 @@ function buildReturnUrl(){
     heartVal: document.getElementById("heartVal"),
     sitterToggle: document.getElementById("sitterToggle"),
     charStatus: document.getElementById("charStatus"),
-    macaronWrap: document.getElementById("macaronWrap"),
-    macaronImg: document.getElementById("macaronImg"),
-    charWrap: document.getElementById("charWrap"),
-    charImg: document.getElementById("charImg"),
-    charScaleBox: document.getElementById("charScaleBox"),
+    entityImg: document.getElementById("entityImg"),
+    entityBubble: document.getElementById("entityBubble"),
     sleepStatus: document.getElementById("sleepStatus"),
-    
+
     btnFood: document.getElementById("btnFood"),
     btnOut: document.getElementById("btnOut"),
     btnStyle: document.getElementById("btnStyle"),
@@ -803,60 +412,76 @@ function buildReturnUrl(){
     btnName: document.getElementById("btnName"),
     btnReset: document.getElementById("btnReset"),
     btnLogs: document.getElementById("btnLogs"),
-    
-    countdownScreen: document.getElementById("countdownScreen"),
-    countdownDay: document.getElementById("countdownDay"),
-    countdownTime: document.getElementById("countdownTime"),
-    countdownRemaining: document.getElementById("countdownRemaining"),
-    
+
+    surveyGate: document.getElementById("surveyGate"),
+    btnGoSurvey: document.getElementById("btnGoSurvey"),
+    btnSkipSurvey: document.getElementById("btnSkipSurvey"),
+
+    choiceModal: document.getElementById("choiceModal"),
+    choiceModalTitle: document.getElementById("choiceModalTitle"),
+    choiceModalDesc: document.getElementById("choiceModalDesc"),
+    choiceProgress: document.getElementById("choiceProgress"),
+    choiceQuestion: document.getElementById("choiceQuestion"),
+    choiceLeft: document.getElementById("choiceLeft"),
+    choiceRight: document.getElementById("choiceRight"),
+    btnChoiceClose: document.getElementById("btnChoiceClose"),
+    choiceHint: document.getElementById("choiceHint"),
+
+    letterModal: document.getElementById("letterModal"),
+    letterContent: document.getElementById("letterContent"),
+    btnLetter: document.getElementById("btnLetter"),
+    btnLetterClose: document.getElementById("btnLetterClose"),
+
+    logsModal: document.getElementById("logsModal"),
+    logsContent: document.getElementById("logsContent"),
+    btnLogsClose: document.getElementById("btnLogsClose"),
+
     poopGame: document.getElementById("poopGame"),
     poopGameArea: document.getElementById("poopGameArea"),
     poopScore: document.getElementById("poopScore"),
     btnPoopExit: document.getElementById("btnPoopExit"),
-    
-    surveyGate: document.getElementById("surveyGate"),
-    btnGoSurvey: document.getElementById("btnGoSurvey"),
-    btnSkipSurvey: document.getElementById("btnSkipSurvey"),
-    
-    endingModal: document.getElementById("endingModal"),
-    chooseLog: document.getElementById("chooseLog"),
-    chooseShape: document.getElementById("chooseShape"),
-    
-    letterModal: document.getElementById("letterModal"),
-    letterContent: document.getElementById("letterContent"),
-    btnLetterClose: document.getElementById("btnLetterClose"),
-    btnLetter: document.getElementById("btnLetter"),
+
+    endingScreen: document.getElementById("endingScreen"),
+    btnEndingLogs: document.getElementById("btnEndingLogs"),
+    btnEndingClose: document.getElementById("btnEndingClose"),
+
+    toast: document.getElementById("toast")
   };
 
-  // ===== セーブデータ構造 =====
+  let poopGameState = { count: 0, target: POOP_COUNT_TARGET };
+  let currentChoiceContext = null;
+
   function createNewSave(){
     return {
-      v: 1,
+      v: 2,
+      playerId: cryptoRandomId(),
       createdAt: new Date().toISOString(),
-      hatched: false,
       ended: false,
       endedAt: null,
+      thankYouShown: false,
+      hatched: false,
       name: "???",
-      colorId: Math.floor(Math.random() * 4),
       heart: 5,
-      hunger: 5,
-      tired: 0,
-      dirty: 0,
-      lastActionElapsed: 0,
-      pausedSince: null,
+      hunger: 4,
+      tired: 2,
+      dirty: 1,
+      mood: 0,
       day: 1,
-      dayStarted: 0,
-      sleepStartedAt: null,
-      events: [],
+      cursors: { food: 0, out: 0, style: 0 },
       choices: {},
-      heartHistory: [{t: 0, v: 5}],
+      events: [],
+      heartHistory: [{ t: 0, v: 5 }],
+      lastActionElapsed: 0,
+      sleepStartedAt: null,
+      pauseAccumMs: 0,
+      pausedSince: null,
+      lastSimElapsed: 0,
+      surveySeen: false
     };
   }
 
-  function saveSave(s){
-    try{
-      localStorage.setItem(SAVE_KEY, JSON.stringify(s));
-    }catch(_){}
+  function cryptoRandomId(){
+    return Math.random().toString(36).slice(2, 10);
   }
 
   function loadSave(){
@@ -868,61 +493,426 @@ function buildReturnUrl(){
     }
   }
 
-  // ===== アンケートゲート =====
+  function saveSave(save){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(_){ }
+  }
+
+  function now(){ return Date.now(); }
+
+  function calcElapsedMs(save, atNow = now()){
+    const created = new Date(save.createdAt).getTime();
+    const currentPause = save.pausedSince ? (atNow - save.pausedSince) : 0;
+    return Math.max(0, atNow - created - (save.pauseAccumMs || 0) - currentPause);
+  }
+
   function checkSurveyDone(){
     return localStorage.getItem(SURVEY_DONE_KEY) === "1";
   }
 
-  function showSurveyGate(){
-    ui.surveyGate.classList.remove("hidden");
+  function buildSurveyUrl(){
+    const current = new URL(location.href);
+    current.searchParams.delete("done");
+    const surveyUrl = new URL("./survey.html", current.href);
+    surveyUrl.searchParams.set("return", current.toString());
+    return surveyUrl.toString();
   }
 
-  function hideSurveyGate(){
-    ui.surveyGate.classList.add("hidden");
-  }
+  function showSurveyGate(){ ui.surveyGate.classList.add("show"); }
+  function hideSurveyGate(){ ui.surveyGate.classList.remove("show"); }
 
-  ui.btnGoSurvey.addEventListener("click", () => {
-    window.open("./survey.html", "_blank");
-  });
-
-  ui.btnSkipSurvey.addEventListener("click", () => {
-    hideSurveyGate();
-  });
-
-  // 初期化時にアンケートゲートチェック
   function initSurveyCheck(){
-    if(!checkSurveyDone()){
-      showSurveyGate();
-    }else{
+    const url = new URL(location.href);
+    if(url.searchParams.get("done") === "1"){
+      localStorage.setItem(SURVEY_DONE_KEY, "1");
+      localStorage.setItem(SURVEY_DONE_AT, new Date().toISOString());
+      url.searchParams.delete("done");
+      history.replaceState({}, "", url.toString());
+      showToast("アンケートありがとう。ゲームに戻りました。");
+    }
+    if(checkSurveyDone()){
       hideSurveyGate();
+    }else{
+      showSurveyGate();
     }
   }
 
-  // ===== カウントダウン表示 =====
-  function updateCountdown(save, elapsed){
-    if(save.hatched){
-      ui.countdownScreen.classList.remove("show");
+  function showToast(message){
+    ui.toast.textContent = message;
+    ui.toast.classList.add("show");
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => ui.toast.classList.remove("show"), 2200);
+  }
+
+  function touchAction(save){
+    save.lastActionElapsed = calcElapsedMs(save);
+    save.sleepStartedAt = null;
+  }
+
+  function pushLiveLog(save, text){
+    save.events.push({ t: new Date().toISOString(), day: save.day, text });
+  }
+
+  function addChoice(save, category, text){
+    const key = `day${save.day}_${category}`;
+    if(!save.choices[key]) save.choices[key] = [];
+    save.choices[key].push(text);
+  }
+
+  function recordHeart(save){
+    const elapsed = calcElapsedMs(save);
+    const last = save.heartHistory[save.heartHistory.length - 1];
+    if(!last || last.v !== save.heart){
+      save.heartHistory.push({ t: elapsed, v: round1(save.heart) });
+    }
+  }
+
+  function round1(v){ return Math.round(v * 10) / 10; }
+
+  function isSleeping(save, elapsed){
+    return !!save.sleepStartedAt && (elapsed - save.sleepStartedAt) < SLEEP_MS;
+  }
+
+  function startSleep(save, elapsed, logText){
+    save.sleepStartedAt = elapsed;
+    pushLiveLog(save, logText);
+  }
+
+  function updateDayBoundary(save, elapsed){
+    const nextDay = Math.min(TOTAL_DAYS, Math.floor(elapsed / DAY_LENGTH_MS) + 1);
+    if(nextDay !== save.day){
+      save.day = nextDay;
+      pushLiveLog(save, `Day ${save.day} 開始`);
+    }
+  }
+
+  function maybeEnd(save, elapsed){
+    if(save.ended) return;
+    const finishedTime = elapsed >= DAY_LENGTH_MS * TOTAL_DAYS;
+    const noHeart = save.heart <= 0;
+    if(finishedTime || noHeart){
+      save.ended = true;
+      save.endedAt = new Date().toISOString();
+      save.heart = Math.max(0, round1(save.heart));
+      pushLiveLog(save, "ありがとう");
+      saveSave(save);
+      showEnding();
+    }
+  }
+
+  function showEnding(){
+    ui.endingScreen.classList.add("show");
+  }
+
+  function hideEnding(){
+    ui.endingScreen.classList.remove("show");
+  }
+
+  function applyPassiveChange(save, elapsed){
+    if(save.pausedSince || save.ended) return;
+    const prev = save.lastSimElapsed || 0;
+    const dt = Math.max(0, elapsed - prev) / 1000;
+    if(!dt) return;
+
+    save.hunger = Math.min(10, save.hunger + dt * 0.012);
+    save.tired  = Math.min(10, save.tired  + dt * 0.010);
+    save.dirty  = Math.min(10, save.dirty  + dt * 0.008);
+    save.heart  = Math.max(0, save.heart  - dt * 0.0025);
+
+    save.lastSimElapsed = elapsed;
+  }
+
+  function updateHeartDisplay(save){
+    const pct = Math.max(0, Math.min(100, save.heart / 10 * 100));
+    ui.heartFill.style.width = pct + "%";
+    ui.heartVal.textContent = `${round1(save.heart)}/10`;
+    recordHeart(save);
+  }
+
+  function getFaceState(save, elapsed){
+    if(!save.hatched) return "egg";
+    if(isSleeping(save, elapsed)) return "sleep";
+    if(save.hunger > 7 || save.dirty > 6 || save.heart < 3) return "sad";
+    return "happy";
+  }
+
+  function buildEggSvg(){
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260">
+        <defs>
+          <radialGradient id="g1" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#fff7ed"/>
+            <stop offset="55%" stop-color="#f9a8d4"/>
+            <stop offset="100%" stop-color="#a78bfa"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="130" cy="140" rx="64" ry="84" fill="url(#g1)"/>
+        <ellipse cx="110" cy="110" rx="18" ry="10" fill="rgba(255,255,255,.45)"/>
+        <circle cx="98" cy="138" r="6" fill="#fff" opacity=".85"/>
+        <circle cx="162" cy="136" r="6" fill="#fff" opacity=".85"/>
+        <path d="M112 170c10 8 26 8 36 0" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".8"/>
+      </svg>`;
+    return svgToData(svg);
+  }
+
+  function buildCharSvg(face){
+    const mouth = face === "sleep"
+      ? `<path d="M108 164c8 4 36 4 44 0" stroke="#0b1028" stroke-width="5" stroke-linecap="round" fill="none"/>`
+      : face === "sad"
+        ? `<path d="M108 174c12-10 32-10 44 0" stroke="#0b1028" stroke-width="5" stroke-linecap="round" fill="none"/>`
+        : `<path d="M108 168c12 10 32 10 44 0" stroke="#0b1028" stroke-width="5" stroke-linecap="round" fill="none"/>`;
+
+    const eyes = face === "sleep"
+      ? `<path d="M95 142c8-6 16-6 24 0" stroke="#0b1028" stroke-width="5" stroke-linecap="round" fill="none"/>
+         <path d="M141 142c8-6 16-6 24 0" stroke="#0b1028" stroke-width="5" stroke-linecap="round" fill="none"/>`
+      : `<circle cx="106" cy="142" r="7" fill="#0b1028"/><circle cx="154" cy="142" r="7" fill="#0b1028"/>`;
+
+    const blush = face === "sad" ? "opacity='.18'" : "opacity='.28'";
+    const halo = face === "sad" ? "#fda4af" : face === "sleep" ? "#bfdbfe" : "#c4b5fd";
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260">
+        <defs>
+          <radialGradient id="body" cx="40%" cy="30%" r="60%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="58%" stop-color="#c4b5fd"/>
+            <stop offset="100%" stop-color="#93c5fd"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="130" cy="128" rx="76" ry="70" fill="${halo}" opacity=".18"/>
+        <ellipse cx="130" cy="146" rx="74" ry="86" fill="url(#body)"/>
+        <circle cx="92" cy="108" r="20" fill="#c4b5fd" opacity=".65"/>
+        <circle cx="168" cy="108" r="20" fill="#93c5fd" opacity=".65"/>
+        <circle cx="90" cy="162" r="12" fill="#fda4af" ${blush}/>
+        <circle cx="170" cy="162" r="12" fill="#fda4af" ${blush}/>
+        ${eyes}
+        ${mouth}
+      </svg>`;
+    return svgToData(svg);
+  }
+
+  function svgToData(svg){
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
+  }
+
+  function updateEntityDisplay(save){
+    const elapsed = calcElapsedMs(save);
+    const face = getFaceState(save, elapsed);
+    ui.entityImg.src = face === "egg" ? buildEggSvg() : buildCharSvg(face);
+
+    if(!save.hatched){
+      const remain = Math.max(0, HATCH_MS - elapsed);
+      ui.entityBubble.textContent = remain > 0 ? "どんな子かな？ ちょっと待ってね" : "ふわっ";
+      ui.sleepStatus.textContent = "";
+      ui.charStatus.textContent = "静かに待っている";
       return;
     }
 
-    const hatchTime = 10000; // 10秒でふ化
-    const timeLeft = Math.max(0, hatchTime - elapsed);
-    const seconds = Math.ceil(timeLeft / 1000);
-    
-    if(timeLeft <= 0){
-      ui.countdownScreen.classList.remove("show");
+    const texts = [];
+    if(face === "sleep"){
+      ui.sleepStatus.textContent = "zzz...";
+      ui.entityBubble.textContent = "すやすや";
+    }else if(face === "sad"){
+      ui.sleepStatus.textContent = "";
+      ui.entityBubble.textContent = "...";
     }else{
-      ui.countdownScreen.classList.add("show");
-      ui.countdownDay.textContent = save.day;
-      ui.countdownTime.textContent = `あと ${seconds} 秒...`;
-      ui.countdownRemaining.textContent = "キャラが生まれるまで待ってね";
+      ui.sleepStatus.textContent = "";
+      ui.entityBubble.textContent = save.name === "???" ? "こんにちは" : save.name;
+    }
+
+    if(save.hunger > 7) texts.push("おなかがすいていそう");
+    if(save.tired > 7) texts.push("少しつかれていそう");
+    if(save.dirty > 6) texts.push("そろそろそうじしたいかも");
+    if(texts.length === 0) texts.push("いっしょにいる");
+    ui.charStatus.textContent = texts.join(" / ");
+  }
+
+  function updateCountdownText(save, elapsed){
+    if(save.ended){
+      ui.countdownText.textContent = "記録のみ";
+      return;
+    }
+    if(!save.hatched){
+      const left = Math.max(0, HATCH_MS - elapsed);
+      const s = Math.ceil(left / 1000);
+      ui.countdownText.textContent = `ふかまで ${s}秒`;
+      return;
+    }
+    const left = Math.max(0, DAY_LENGTH_MS * TOTAL_DAYS - elapsed);
+    const day = Math.min(TOTAL_DAYS, Math.floor(elapsed / DAY_LENGTH_MS) + 1);
+    const hh = Math.floor((left % DAY_LENGTH_MS) / 60000);
+    const mm = Math.floor((left % 60000) / 1000);
+    ui.countdownText.textContent = `Day ${day} の途中 ${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  }
+
+  function hatchIfNeeded(save, elapsed){
+    if(!save.hatched && elapsed >= HATCH_MS){
+      save.hatched = true;
+      pushLiveLog(save, "ふ化した");
+      addChoice(save, "Hatch", "Born");
+      showToast("ふわっと生まれました。");
     }
   }
 
-  // ===== 💩ゲーム =====
-  let poopGameState = { count: 0, target: POOP_COUNT_TARGET };
+  function maybeAutoSleep(save, elapsed){
+    if(!save.hatched || save.ended || save.pausedSince || isSleeping(save, elapsed)) return;
+    const idle = elapsed - (save.lastActionElapsed || 0);
+    if(idle >= IDLE_SLEEP_AFTER_MS){
+      startSleep(save, elapsed, "静かだから寝てしまった");
+      save.lastActionElapsed = elapsed;
+    }
+  }
+
+  function openChoiceModal(kind){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
+
+    let list = [];
+    let cursorKey = "food";
+    let title = "2択";
+    let desc = "どちらかを選ぶ";
+
+    if(kind === "food"){
+      list = FOOD_CHOICES;
+      cursorKey = "food";
+      title = "ごはん";
+      desc = "ごはんボタンを押すたびに、20この2択が順番に出ます。";
+    }else if(kind === "out"){
+      list = OUT_CHOICES;
+      cursorKey = "out";
+      title = "おでかけ";
+      desc = "その日の気分で選ぶ。";
+    }else if(kind === "style"){
+      list = STYLE_CHOICES;
+      cursorKey = "style";
+      title = "スタイル";
+      desc = "見た目の変化に、正解はありません。";
+    }
+
+    const index = save.cursors[cursorKey] % list.length;
+    const pair = list[index];
+
+    currentChoiceContext = { kind, cursorKey, list, index, pair };
+    ui.choiceModalTitle.textContent = title;
+    ui.choiceModalDesc.textContent = desc;
+    ui.choiceProgress.textContent = `${index + 1} / ${list.length}`;
+    ui.choiceQuestion.textContent = `${pair[0]} にする？ それとも ${pair[1]}？`;
+    ui.choiceLeft.textContent = pair[0];
+    ui.choiceRight.textContent = pair[1];
+    ui.choiceHint.textContent = kind === "food"
+      ? "選ぶと次回は次の2択が出ます。"
+      : "選ぶと記録に残ります。";
+    ui.choiceModal.classList.add("show");
+  }
+
+  function closeChoiceModal(){
+    ui.choiceModal.classList.remove("show");
+    currentChoiceContext = null;
+  }
+
+  function hiddenDelta(kind, index, side){
+    const seed = ((index + 1) * (side + 2) + kind.length) % 5;
+    if(kind === "food"){
+      const map = [
+        { heart: 0.8, hunger: -2.2, tired: 0.2 },
+        { heart: 0.5, hunger: -1.7, dirty: 0.1 },
+        { heart: 0.9, hunger: -1.9, tired: -0.2 },
+        { heart: 0.3, hunger: -2.4, dirty: 0.2 },
+        { heart: 0.6, hunger: -1.8, mood: 0.4 }
+      ];
+      return map[seed];
+    }
+    if(kind === "out"){
+      const map = [
+        { heart: 0.8, tired: 0.6, hunger: 0.4 },
+        { heart: 0.4, tired: -0.6, hunger: 0.1 },
+        { heart: 0.7, tired: 0.2, dirty: 0.5 },
+        { heart: 0.5, tired: -0.2, mood: 0.5 },
+        { heart: 0.6, hunger: 0.3, mood: 0.2 }
+      ];
+      return map[seed];
+    }
+    const map = [
+      { heart: 0.8, mood: 0.6 },
+      { heart: 0.5, mood: 0.3 },
+      { heart: 0.7, tired: -0.2 },
+      { heart: 0.4, dirty: -0.1 },
+      { heart: 0.6, mood: 0.4 }
+    ];
+    return map[seed];
+  }
+
+  function applyDelta(save, delta){
+    save.heart = clamp(save.heart + (delta.heart || 0), 0, 10);
+    save.hunger = clamp(save.hunger + (delta.hunger || 0), 0, 10);
+    save.tired = clamp(save.tired + (delta.tired || 0), 0, 10);
+    save.dirty = clamp(save.dirty + (delta.dirty || 0), 0, 10);
+    save.mood = clamp(save.mood + (delta.mood || 0), -10, 10);
+  }
+
+  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+  function selectCurrentChoice(side){
+    if(!currentChoiceContext) return;
+    const save = loadSave();
+    if(!save || save.ended) return;
+
+    const { kind, cursorKey, index, pair } = currentChoiceContext;
+    const selected = pair[side];
+    applyDelta(save, hiddenDelta(kind, index, side));
+    save.cursors[cursorKey] += 1;
+    touchAction(save);
+
+    const label = `${pair[0]} / ${pair[1]} → ${selected}`;
+    if(kind === "food"){
+      pushLiveLog(save, `ごはんで「${selected}」を選んだ`);
+      addChoice(save, "Food", label);
+      showToast(`今日は「${selected}」にしました。`);
+    }else if(kind === "out"){
+      pushLiveLog(save, `おでかけで「${selected}」を選んだ`);
+      addChoice(save, "Out", label);
+      showToast(`「${selected}」を選びました。`);
+    }else if(kind === "style"){
+      pushLiveLog(save, `スタイルで「${selected}」を選んだ`);
+      addChoice(save, "Style", label);
+      showToast(`「${selected}」にしてみました。`);
+    }
+
+    saveSave(save);
+    closeChoiceModal();
+  }
+
+  function actDrink(){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
+    save.heart = clamp(save.heart + 1.2, 0, 10);
+    save.tired = clamp(save.tired - 1.2, 0, 10);
+    pushLiveLog(save, "ドリンクをあげた");
+    addChoice(save, "Drink", "Drink");
+    touchAction(save);
+    saveSave(save);
+    showToast("少し元気になったみたいです。");
+  }
+
+  function actMacaron(){
+    const save = loadSave();
+    if(!save) return;
+    if(save.ended){
+      showToast("いまはログだけが残っています。");
+      return;
+    }
+    if(!save.hatched) return;
+    save.heart = clamp(save.heart + 1.8, 0, 10);
+    save.hunger = clamp(save.hunger - 0.8, 0, 10);
+    pushLiveLog(save, "マカロンをあげた");
+    addChoice(save, "Macaron", "Give");
+    touchAction(save);
+    saveSave(save);
+    showToast("甘い時間が過ぎました。");
+  }
 
   function startPoopGame(){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
     ui.poopGame.classList.add("show");
     poopGameState = { count: 0, target: POOP_COUNT_TARGET };
     ui.poopGameArea.innerHTML = "";
@@ -932,34 +922,28 @@ function buildReturnUrl(){
 
   function spawnPoops(){
     const area = ui.poopGameArea;
-    const w = area.offsetWidth;
-    const h = area.offsetHeight;
-    
+    const w = area.clientWidth;
+    const h = area.clientHeight;
     for(let i = 0; i < 3; i++){
       setTimeout(() => {
-        if(poopGameState.count >= poopGameState.target) return;
-        
+        if(!ui.poopGame.classList.contains("show") || poopGameState.count >= poopGameState.target) return;
         const poop = document.createElement("div");
         poop.className = "poop";
         poop.textContent = "💩";
-        poop.style.left = Math.random() * (w - 40) + "px";
-        poop.style.top = Math.random() * (h - 40) + "px";
-        
+        poop.style.left = Math.random() * (w - 42) + "px";
+        poop.style.top = Math.random() * (h - 42) + "px";
         poop.addEventListener("click", () => {
-          poopGameState.count++;
+          poopGameState.count += 1;
           updatePoopScore();
-          poop.style.animation = "none";
-          setTimeout(() => poop.remove(), 0);
-          
+          poop.remove();
           if(poopGameState.count >= poopGameState.target){
-            setTimeout(() => endPoopGame(), 300);
+            setTimeout(endPoopGame, 250);
           }else{
-            setTimeout(() => spawnPoops(), 400);
+            setTimeout(spawnPoops, 240);
           }
-        });
-        
+        }, { once: true });
         area.appendChild(poop);
-      }, i * 300);
+      }, i * 260);
     }
   }
 
@@ -968,421 +952,219 @@ function buildReturnUrl(){
   }
 
   function endPoopGame(){
+    if(!ui.poopGame.classList.contains("show")) return;
     ui.poopGame.classList.remove("show");
     ui.poopGameArea.innerHTML = "";
-    
     const save = loadSave();
-    if(save){
-      save.dirty = Math.max(0, save.dirty - 3);
-      save.heart = Math.min(10, save.heart + 1);
-      pushLiveLog(save, "そうじが完了！");
+    if(!save || save.ended) return;
+    if(poopGameState.count > 0){
+      save.dirty = clamp(save.dirty - 3.0, 0, 10);
+      save.heart = clamp(save.heart + 0.8, 0, 10);
+      touchAction(save);
+      pushLiveLog(save, "そうじをした");
       addChoice(save, "Clean", `Complete (${poopGameState.count})`);
       saveSave(save);
+      showToast("きれいになりました。");
     }
-  }
-
-  ui.btnPoopExit.addEventListener("click", endPoopGame);
-
-  // ===== 時間計算 =====
-  function now(){
-    return Date.now();
-  }
-
-  function calcElapsedMs(save, tNow){
-    if(!save.createdAt) return 0;
-    const created = new Date(save.createdAt).getTime();
-    const pausedOffset = save.pausedSince ? (now() - save.pausedSince) : 0;
-    return tNow - created - pausedOffset;
-  }
-
-  // ===== 状態管理 =====
-  function isSleeping(save, elapsed){
-    if(!save.sleepStartedAt) return false;
-    const sleepElapsed = elapsed - save.sleepStartedAt;
-    return sleepElapsed < 30000; // 30秒で起きる
-  }
-
-  function startSleep(save, elapsed, logText){
-    save.sleepStartedAt = elapsed;
-    pushLiveLog(save, logText);
-  }
-
-  function addChoice(save, category, choice){
-    const key = `${save.day}_${category}`;
-    if(!save.choices[key]) save.choices[key] = [];
-    save.choices[key].push(choice);
-  }
-
-  function pushLiveLog(save, text){
-    save.events.push({
-      t: new Date().toISOString(),
-      day: save.day,
-      text: text,
-    });
-  }
-
-  function updateDayBoundary(save, elapsed){
-    const currentDay = Math.floor(elapsed / DAY_LENGTH_MS) + 1;
-    if(currentDay !== save.day){
-      save.day = Math.min(3, currentDay);
-      pushLiveLog(save, `Day ${save.day} 開始`);
-    }
-  }
-
-  function maybeEnd(save, elapsed){
-    if(save.heart <= 0 && !save.ended){
-      save.ended = true;
-      save.endedAt = new Date().toISOString();
-      pushLiveLog(save, "お別れの時");
-      saveSave(save);
-      showEndingChoice(save);
-    }
-  }
-
-  // ===== 手紙機能 =====
-  function getLetterText(){
-    return `うちの子へ
-
-3日間、やさしく育ててくれてありがとう。
-
-いま、この子は小さくて弱い存在。
-ふ化したばかりだから。
-
-毎日のごはん。
-たまのおでかけ。
-時々のお化粧。
-時々のドリンク。
-そして時々のマカロン。
-
-その全部が、この子にとっての
-大切な時間になっていくんだと思う。
-
-だからこそ、いまだけは。
-やさしく育ててね。
-
-        from 研究者より`;
   }
 
   function openLetter(){
-    ui.letterContent.textContent = getLetterText();
-    ui.letterModal.style.display = "grid";
+    ui.letterContent.textContent =
+`見つけてくれたあなたへ
+
+この子は、まだ生まれたばかりです。
+
+ごはんを選ぶこと。
+少しおでかけすること。
+きれいにしてあげること。
+たまに、そっと休ませてあげること。
+
+そのひとつひとつが、きっとこの子の時間になります。
+
+正しい育て方はありません。
+あるのは、あなたが選んだことと、残る記録だけです。
+
+どうか、3日間よろしくね。`;
+    ui.letterModal.classList.add("show");
   }
 
   function closeLetter(){
-    ui.letterModal.style.display = "none";
+    ui.letterModal.classList.remove("show");
   }
 
-  // ===== 死亡後の同一性選択 =====
-  function showEndingChoice(save){
-    ui.endingModal.style.display = "grid";
-    
-    ui.chooseLog.addEventListener("click", () => {
-      ui.endingModal.style.display = "none";
-      openLogsModal(save);
-    }, {once: true});
-    
-    ui.chooseShape.addEventListener("click", () => {
-      ui.endingModal.style.display = "none";
-      saveCharacterImage(save);
-    }, {once: true});
-  }
-
-  function saveCharacterImage(save){
-    alert("容姿が記録されました。\n別の実験に進んでください。");
-  }
-
-  // ===== アクション =====
-  function actFood(){
+  function openLogs(){
     const save = loadSave();
-    if(!save || save.ended) return;
-    
-    save.hunger = Math.max(0, save.hunger - 2);
-    save.heart = Math.min(10, save.heart + 1);
-    pushLiveLog(save, "ごはんを食べた");
-    addChoice(save, "Food", "Feed");
-    touchAction(save);
-    saveSave(save);
+    if(!save) return;
+    const groups = buildDayLogs(save);
+    ui.logsContent.innerHTML = groups.map(group => `
+      <div class="logDay">
+        <h3>Day ${group.day}</h3>
+        <ul>${group.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    `).join("");
+    ui.logsModal.classList.add("show");
   }
 
-  function actOut(){
-    const save = loadSave();
-    if(!save || save.ended) return;
-    
-    save.tired = Math.max(0, save.tired - 2);
-    save.hunger = Math.min(10, save.hunger + 1);
-    save.heart = Math.min(10, save.heart + 1);
-    pushLiveLog(save, "おでかけした");
-    addChoice(save, "Out", "Play");
-    touchAction(save);
-    saveSave(save);
+  function closeLogs(){
+    ui.logsModal.classList.remove("show");
   }
 
-  function actStyle(){
-    const save = loadSave();
-    if(!save || save.ended) return;
-    
-    save.colorId = (save.colorId + 1) % 4;
-    save.heart = Math.min(10, save.heart + 1);
-    pushLiveLog(save, "スタイルを変更した");
-    addChoice(save, "Style", `Color${save.colorId}`);
-    touchAction(save);
-    saveSave(save);
+  function buildDayLogs(save){
+    const result = [];
+    for(let day = 1; day <= TOTAL_DAYS; day++){
+      const items = [];
+      const dayEvents = (save.events || []).filter(e => e.day === day).map(e => e.text);
+      const food = save.choices[`day${day}_Food`] || [];
+      const out = save.choices[`day${day}_Out`] || [];
+      const style = save.choices[`day${day}_Style`] || [];
+      const clean = save.choices[`day${day}_Clean`] || [];
+      const drink = save.choices[`day${day}_Drink`] || [];
+      const macaron = save.choices[`day${day}_Macaron`] || [];
+      items.push(`ハートの最後: ${round1(getDayHeart(save, day))}`);
+      if(food.length) items.push(`ごはん: ${food.join(" / ")}`);
+      if(out.length) items.push(`おでかけ: ${out.join(" / ")}`);
+      if(style.length) items.push(`スタイル: ${style.join(" / ")}`);
+      if(clean.length) items.push(`そうじ: ${clean.join(" / ")}`);
+      if(drink.length) items.push(`ドリンク: ${drink.length}回`);
+      if(macaron.length) items.push(`マカロン: ${macaron.length}回`);
+      if(dayEvents.length) items.push(...dayEvents);
+      if(!items.length) items.push("まだ記録がありません。");
+      result.push({ day, items });
+    }
+    return result;
   }
 
-  function actDrink(){
-    const save = loadSave();
-    if(!save || save.ended) return;
-    
-    save.heart = Math.min(10, save.heart + 2);
-    pushLiveLog(save, "ドリンクをあげた");
-    addChoice(save, "Drink", "Drink");
-    touchAction(save);
-    saveSave(save);
+  function getDayHeart(save, day){
+    const upper = day * DAY_LENGTH_MS;
+    const candidates = (save.heartHistory || []).filter(h => h.t <= upper);
+    return candidates.length ? candidates[candidates.length - 1].v : save.heart;
   }
 
-  function actMacaron(){
-    const save = loadSave();
-    if(!save || save.ended) return;
-    
-    save.heart = Math.min(10, save.heart + 3);
-    pushLiveLog(save, "マカロンをあげた");
-    addChoice(save, "Macaron", "Give");
-    touchAction(save);
-    saveSave(save);
-  }
-
-  function touchAction(save){
-    const tNow = now();
-    const elapsed = calcElapsedMs(save, tNow);
-    save.lastActionElapsed = elapsed;
-    save.sleepStartedAt = null;
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
   }
 
   function toggleSitter(){
     const save = loadSave();
-    if(!save) return;
-    
+    if(!save || save.ended) return;
     if(!save.pausedSince){
       save.pausedSince = now();
-      ui.sitterToggle.dataset.on = "true";
       pushLiveLog(save, "シッター開始");
+      showToast("シッターが見てくれます。");
     }else{
       const paused = now() - save.pausedSince;
+      save.pauseAccumMs += paused;
       save.pausedSince = null;
-      ui.sitterToggle.dataset.on = "false";
-      pushLiveLog(save, `シッター終了 (${Math.round(paused/1000)}秒)`);
+      pushLiveLog(save, `シッター終了 (${Math.round(paused / 1000)}秒)`);
+      showToast("また時間が動きはじめます。");
     }
     saveSave(save);
+    ui.sitterToggle.dataset.on = save.pausedSince ? "true" : "false";
   }
 
-  // ===== UI更新 =====
-  function updateHeartDisplay(save){
-    const pct = (save.heart / 10) * 100;
-    ui.heartFill.style.width = pct + "%";
-    ui.heartVal.textContent = `${save.heart}/10`;
-    
-    const lastHeart = save.heartHistory[save.heartHistory.length - 1];
-    if(!lastHeart || lastHeart.v !== save.heart){
-      save.heartHistory.push({t: calcElapsedMs(save, now()), v: save.heart});
-    }
+  function changeName(){
+    const save = loadSave();
+    if(!save || save.ended) return;
+    const newName = prompt("名前を入力してください:", save.name === "???" ? "" : save.name);
+    if(!newName || !newName.trim()) return;
+    save.name = newName.trim();
+    pushLiveLog(save, `名前が「${save.name}」に決まった`);
+    saveSave(save);
+    showToast(`「${save.name}」になりました。`);
   }
 
-  function updateCharDisplay(save){
-    ui.dayNum.textContent = save.day;
-    
-    const colors = ["blue", "green", "pink", "purple"];
-    const color = colors[save.colorId % 4];
-    
-    let imgPath = "";
-    if(!save.hatched){
-      // マカロン（卵）
-      ui.macaronWrap.style.display = "grid";
-      ui.charWrap.style.display = "none";
-      imgPath = `macaron_${color}.png`;
-      ui.macaronImg.src = imgPath;
-    }else{
-      ui.macaronWrap.style.display = "none";
-      ui.charWrap.style.display = "grid";
-      
-      if(isSleeping(save, calcElapsedMs(save, now()))){
-        imgPath = `${color}_sleep.png`;
-        ui.sleepStatus.textContent = "zzz...";
-        ui.sleepStatus.className = "sleepStatus resting";
-      }else if(save.dirty > 6){
-        imgPath = `${color}_closed.png`;
-        ui.sleepStatus.textContent = "困ってる...";
-        ui.sleepStatus.className = "sleepStatus tired";
-      }else{
-        imgPath = `${color}_open.png`;
-        ui.sleepStatus.textContent = "";
-      }
-      ui.charImg.src = imgPath;
-    }
-    
-    const statusTexts = [];
-    if(save.hunger > 7) statusTexts.push("お腹すいてる");
-    if(save.tired > 7) statusTexts.push("疲れてる");
-    if(save.dirty > 5) statusTexts.push("汚れてる");
-    if(statusTexts.length === 0) statusTexts.push("元気");
-    
-    ui.charStatus.textContent = statusTexts.join(" / ");
+  function resetGame(){
+    if(!confirm("本当にリセットしますか？")) return;
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
   }
 
-  function updateCountdownDisplay(save, elapsed){
-    const hatchTime = 10000;
-    const timeLeft = Math.max(0, hatchTime - elapsed);
-    
-    if(timeLeft > 0){
-      const s = Math.ceil(timeLeft / 1000);
-      const m = Math.floor(s / 60);
-      const ss = s % 60;
-      ui.countdownText.textContent = `あと ${m}:${String(ss).padStart(2,"0")}`;
-    }
-  }
+  function render(){
+    const save = loadSave();
+    if(!save) return;
 
-  function render(save){
-    const tNow = now();
-    const elapsed = calcElapsedMs(save, tNow);
-    
-    // 時間シミュレーション
-    if(!save.pausedSince && !save.ended){
-      const dt = (elapsed - (save.lastSimElapsed || 0)) / 1000;
-      save.hunger = Math.min(10, save.hunger + dt * 0.01);
-      save.tired = Math.min(10, save.tired + dt * 0.008);
-      save.dirty = Math.min(10, save.dirty + dt * 0.005);
-      save.heart = Math.max(0, save.heart - dt * 0.002);
-    }
-    
-    if(!save.hatched && elapsed > 10000){
-      save.hatched = true;
-      pushLiveLog(save, "ふ化した！");
-      addChoice(save, "Hatch", "Born");
-      
-      // ふ化アニメーション処理
-      setTimeout(() => {
-        ui.macaronImg.classList.add("hatchAnimation");
-      }, 100);
-      
-      setTimeout(() => {
-        ui.macaronWrap.style.display = "none";
-        ui.charWrap.style.display = "grid";
-        ui.charWrap.classList.add("charAppear");
-      }, 900);
-    }
-    
+    const elapsed = calcElapsedMs(save);
+    applyPassiveChange(save, elapsed);
+    hatchIfNeeded(save, elapsed);
     updateDayBoundary(save, elapsed);
+    maybeAutoSleep(save, elapsed);
     maybeEnd(save, elapsed);
-    updateCountdown(save, elapsed);
+
+    ui.dayNum.textContent = save.day;
+    ui.sitterToggle.dataset.on = save.pausedSince ? "true" : "false";
     updateHeartDisplay(save);
-    updateCharDisplay(save);
-    updateCountdownDisplay(save, elapsed);
-    
-    // 自動スリープ
-    if(save.hatched && !isSleeping(save, elapsed)){
-      const idle = elapsed - (save.lastActionElapsed || 0);
-      if(idle >= IDLE_SLEEP_AFTER_MS){
-        startSleep(save, elapsed, "静かだから寝てしまった...");
-        save.lastActionElapsed = elapsed;
-      }
-    }
-    
-    save.lastSimElapsed = elapsed;
+    updateCountdownText(save, elapsed);
+    updateEntityDisplay(save);
+
+    disableActions(save.ended);
     saveSave(save);
   }
 
-  // ===== ログ表示 =====
-  function openLogsModal(save){
-    const modal = document.createElement("div");
-    modal.className = "modalOverlay";
-    
-    const box = document.createElement("div");
-    box.className = "modalBox";
-    
-    const title = document.createElement("h2");
-    title.textContent = "3日間の記録";
-    box.appendChild(title);
-    
-    const list = document.createElement("div");
-    list.style.maxHeight = "400px";
-    list.style.overflow = "auto";
-    
-    const events = (save.events || []).reverse().slice(0, 100);
-    for(const e of events){
-      const item = document.createElement("div");
-      item.style.cssText = "padding:8px; border-bottom:1px solid rgba(255,255,255,.08); font-size:12px;";
-      const dt = new Date(e.t);
-      const time = dt.toLocaleTimeString("ja-JP");
-      item.innerHTML = `<b>${e.text}</b><div style="color:var(--muted); margin-top:2px;">Day ${e.day} / ${time}</div>`;
-      list.appendChild(item);
+  function disableActions(disabled){
+    [ui.btnFood, ui.btnOut, ui.btnStyle, ui.btnClean, ui.btnDrink, ui.btnMacaron, ui.btnName].forEach(btn => {
+      btn.disabled = disabled;
+    });
+    if(disabled){
+      ui.charStatus.textContent = "記録だけが残っている";
     }
-    box.appendChild(list);
-    
-    const btn = document.createElement("button");
-    btn.textContent = "閉じる";
-    btn.style.marginTop = "16px";
-    btn.style.width = "100%";
-    btn.addEventListener("click", () => modal.remove());
-    box.appendChild(btn);
-    
-    modal.appendChild(box);
-    document.body.appendChild(modal);
   }
 
-  // ===== イベントリスナー =====
-  ui.sitterToggle.addEventListener("click", toggleSitter);
-  ui.btnFood.addEventListener("click", actFood);
-  ui.btnOut.addEventListener("click", actOut);
-  ui.btnStyle.addEventListener("click", actStyle);
-  ui.btnClean.addEventListener("click", startPoopGame);
+  ui.btnGoSurvey.addEventListener("click", () => {
+    location.href = buildSurveyUrl();
+  });
+  ui.btnSkipSurvey.addEventListener("click", hideSurveyGate);
+
+  ui.btnFood.addEventListener("click", () => openChoiceModal("food"));
+  ui.btnOut.addEventListener("click", () => openChoiceModal("out"));
+  ui.btnStyle.addEventListener("click", () => openChoiceModal("style"));
   ui.btnDrink.addEventListener("click", actDrink);
   ui.btnMacaron.addEventListener("click", actMacaron);
-  
-  ui.btnName.addEventListener("click", () => {
-    const newName = prompt("名前を入力してください:");
-    if(newName && newName.trim()){
-      const save = loadSave();
-      if(save){
-        save.name = newName.trim();
-        pushLiveLog(save, `名前が『${save.name}』に決まった`);
-        saveSave(save);
-      }
-    }
-  });
-  
-  ui.btnReset.addEventListener("click", () => {
-    if(confirm("本当にリセットしますか？")){
-      localStorage.removeItem(SAVE_KEY);
-      location.reload();
-    }
-  });
-  
-  ui.btnLogs.addEventListener("click", () => {
-    const save = loadSave();
-    if(save) openLogsModal(save);
-  });
+  ui.btnClean.addEventListener("click", startPoopGame);
+  ui.sitterToggle.addEventListener("click", toggleSitter);
+  ui.btnName.addEventListener("click", changeName);
+  ui.btnReset.addEventListener("click", resetGame);
+
+  ui.choiceLeft.addEventListener("click", () => selectCurrentChoice(0));
+  ui.choiceRight.addEventListener("click", () => selectCurrentChoice(1));
+  ui.btnChoiceClose.addEventListener("click", closeChoiceModal);
 
   ui.btnLetter.addEventListener("click", openLetter);
   ui.btnLetterClose.addEventListener("click", closeLetter);
 
-  // ===== 初期化 =====
+  ui.btnLogs.addEventListener("click", openLogs);
+  ui.btnLogsClose.addEventListener("click", closeLogs);
+  ui.btnEndingLogs.addEventListener("click", () => { hideEnding(); openLogs(); });
+  ui.btnEndingClose.addEventListener("click", hideEnding);
+  ui.btnPoopExit.addEventListener("click", endPoopGame);
+
+  [ui.choiceModal, ui.letterModal, ui.logsModal].forEach(modal => {
+    modal.addEventListener("click", (e) => {
+      if(e.target !== modal) return;
+      if(modal === ui.choiceModal) closeChoiceModal();
+      if(modal === ui.letterModal) closeLetter();
+      if(modal === ui.logsModal) closeLogs();
+    });
+  });
+
   initSurveyCheck();
-  
+
   let save = loadSave();
   if(!save){
     save = createNewSave();
+    pushLiveLog(save, "ゲーム開始");
     saveSave(save);
   }
-  
-  ui.sitterToggle.dataset.on = save.pausedSince ? "true" : "false";
-  render(save);
-  
-  // ===== アニメーションループ =====
+
+  render();
   function tick(){
-    const save = loadSave();
-    if(save) render(save);
+    render();
     requestAnimationFrame(tick);
   }
-  
   tick();
 })();
 </script>
