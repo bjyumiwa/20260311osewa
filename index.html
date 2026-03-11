@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>3日間のお世話ゲーム（改良版）</title>
+  <title>3日間のお世話ゲーム</title>
   <style>
     :root{
       --bg0:#050816;
@@ -18,9 +18,10 @@
       --warn:#ffd6a5;
       --accent1:#c4b5fd;
       --accent2:#93c5fd;
-      --danger:#fda4af;
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       color:var(--text);
@@ -32,119 +33,515 @@
       min-height:100vh;
       overflow-x:hidden;
     }
+
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 40px}
+
     .topbar{
-      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
-      padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05);
-      border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:10px;z-index:20;
-      backdrop-filter:blur(10px)
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      position:sticky;
+      top:10px;
+      z-index:20;
+      backdrop-filter:blur(10px);
     }
+
     .brand{display:flex;gap:10px;align-items:center}
     .brand .dot{
       width:12px;height:12px;border-radius:999px;
       background:linear-gradient(180deg,var(--accent1),var(--accent2));
-      box-shadow:0 0 18px rgba(196,181,253,.35)
+      box-shadow:0 0 18px rgba(196,181,253,.35);
     }
     .brand .title{font-weight:800;font-size:14px}
     .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
-    .statusRow{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex:1;flex-wrap:wrap}
-    .pill,.countdown{
-      display:flex;align-items:center;gap:8px;min-height:34px;padding:8px 10px;border-radius:999px;
-      border:1px solid var(--line);background:rgba(255,255,255,.05);position:relative
+
+    .statusRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      flex:1;
+      flex-wrap:wrap;
     }
-    .countdown{border-color:rgba(147,197,253,.3);background:rgba(147,197,253,.1);font-size:13px;font-weight:700}
-    .countdown .icon{width:16px;height:16px;border-radius:999px;background:linear-gradient(45deg,var(--accent2),var(--accent1));animation:pulse 1.6s ease-in-out infinite}
-    @keyframes pulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+
+    .pill,.countdown{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:34px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      position:relative;
+    }
+
+    .countdown{
+      border-color:rgba(147,197,253,.3);
+      background:rgba(147,197,253,.1);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .countdown .icon{
+      width:16px;height:16px;border-radius:999px;
+      background:linear-gradient(45deg,var(--accent2),var(--accent1));
+      animation:pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse{
+      0%,100%{opacity:.6;transform:scale(1)}
+      50%{opacity:1;transform:scale(1.1)}
+    }
+
     .heartIcon{font-size:15px;line-height:1}
-    .hearts{width:140px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);overflow:hidden}
-    .hearts > i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .25s ease}
+
+    .hearts{
+      width:140px;
+      height:10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+
+    .hearts > i{
+      display:block;
+      height:100%;
+      width:50%;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      transition:width .25s ease;
+    }
+
     .toggle{cursor:pointer;user-select:none}
-    .switch{width:42px;height:24px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);position:relative;transition:.18s ease}
-    .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.85);box-shadow:0 8px 14px rgba(0,0,0,.25);transition:.18s ease}
-    .toggle[data-on="true"] .switch{background:rgba(154,230,180,.18);border-color:rgba(154,230,180,.28)}
-    .toggle[data-on="true"] .switch::after{left:20px;background:rgba(154,230,180,.95)}
-    .main{margin-top:14px;display:grid;grid-template-columns:1.5fr 1fr;gap:14px;align-items:start}
-    @media (max-width:900px){.main{grid-template-columns:1fr}}
-    .card{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .cardHeader{padding:12px 12px 10px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+    .switch{
+      width:42px;height:24px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.08);
+      position:relative;
+      transition:.18s ease;
+    }
+
+    .switch::after{
+      content:"";
+      position:absolute;
+      top:2px;left:2px;
+      width:18px;height:18px;border-radius:999px;
+      background:rgba(255,255,255,.85);
+      box-shadow:0 8px 14px rgba(0,0,0,.25);
+      transition:.18s ease;
+    }
+
+    .toggle[data-on="true"] .switch{
+      background:rgba(154,230,180,.18);
+      border-color:rgba(154,230,180,.28);
+    }
+
+    .toggle[data-on="true"] .switch::after{
+      left:20px;
+      background:rgba(154,230,180,.95);
+    }
+
+    .main{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1.5fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    @media (max-width:900px){
+      .main{grid-template-columns:1fr}
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardHeader{
+      padding:12px 12px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     .cardHeader .h{font-weight:800;font-size:14px}
     .cardHeader .hint{font-size:12px;color:var(--muted);margin-top:2px}
     .cardContent{padding:12px}
+
     button{
-      appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);
-      border-radius:14px;padding:12px 10px;cursor:pointer;font-weight:700;letter-spacing:.01em;
-      box-shadow:0 12px 26px rgba(0,0,0,.22);transition:transform .08s ease,background .18s ease,border-color .18s ease,opacity .18s ease
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:14px;
+      padding:12px 10px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:.01em;
+      box-shadow:0 12px 26px rgba(0,0,0,.22);
+      transition:transform .08s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
     }
-    button:hover{transform:translateY(-1px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
+
+    button:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.09);
+      border-color:rgba(255,255,255,.22);
+    }
+
     button:active{transform:translateY(0) scale(.99)}
     button[disabled]{opacity:.45;cursor:not-allowed;transform:none}
     .btnGhost{background:rgba(255,255,255,.03)}
-    .choiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
-    .choiceBtn{
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:86px;
-      padding:16px 12px!important;border-radius:16px;background:rgba(255,255,255,.06)!important;border:1.5px solid rgba(255,255,255,.14)!important
+
+    .choiceGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin:8px 0;
     }
+
+    .choiceBtn{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:86px;
+      padding:16px 12px !important;
+      border-radius:16px;
+      background:rgba(255,255,255,.06) !important;
+      border:1.5px solid rgba(255,255,255,.14) !important;
+    }
+
     .choiceBtn .icon{font-size:32px;line-height:1}
     .choiceBtn .label{font-size:13px;font-weight:800;text-align:center;line-height:1.3}
     .choiceBtn .sub{font-size:11px;color:var(--muted);text-align:center}
-    .stage{position:relative;min-height:540px;padding:14px;overflow:hidden}
-    .stars{position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:
-      radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 2px),
-      radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-      radial-gradient(circle at 70% 30%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-      radial-gradient(circle at 85% 75%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-      radial-gradient(circle at 25% 50%, rgba(255,255,255,.55) 0 1px, transparent 2px);
-      background-size:420px 260px;animation:drift 18s linear infinite}
-    @keyframes drift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-80px,50px,0)}}
-    .center{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;z-index:10}
-    .entity{width:280px;height:280px;display:grid;place-items:center;position:relative}
-    .floaty{animation:floaty 2.8s ease-in-out infinite}
-    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    .entityBubble{position:absolute;top:-6px;right:6px;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:12px;color:var(--muted);backdrop-filter:blur(8px)}
-    .entityImg{width:250px;height:250px;object-fit:contain;filter:drop-shadow(0 18px 26px rgba(0,0,0,.35))}
-    .sleepStatus{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
-    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(11,16,40,.92);color:var(--text);box-shadow:var(--shadow);z-index:110;display:none}
-    .toast.show{display:block;animation:toastIn .25s ease}
-    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-    .modalOverlay,.surveyGate,.poopGameContainer,.endingScreen{
-      position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);display:none;place-items:center;z-index:100
+
+    .stage{
+      position:relative;
+      min-height:540px;
+      padding:14px;
+      overflow:hidden;
     }
+
+    .stars{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.55;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+        radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 70% 30%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 85% 75%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 25% 50%, rgba(255,255,255,.55) 0 1px, transparent 2px);
+      background-size:420px 260px;
+      animation:drift 18s linear infinite;
+    }
+
+    @keyframes drift{
+      0%{transform:translate3d(0,0,0)}
+      100%{transform:translate3d(-80px,50px,0)}
+    }
+
+    .center{
+      position:absolute;
+      left:50%;
+      top:55%;
+      transform:translate(-50%,-50%);
+      width:100%;
+      max-width:560px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      z-index:10;
+    }
+
+    .entity{
+      width:280px;
+      height:280px;
+      display:grid;
+      place-items:center;
+      position:relative;
+    }
+
+    .floaty{animation:floaty 2.8s ease-in-out infinite}
+
+    @keyframes floaty{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-10px)}
+    }
+
+    .entityBubble{
+      position:absolute;
+      top:-6px;
+      right:6px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:12px;
+      color:var(--muted);
+      backdrop-filter:blur(8px);
+    }
+
+    .entityImg{
+      width:250px;
+      height:250px;
+      object-fit:contain;
+      filter:drop-shadow(0 18px 26px rgba(0,0,0,.35));
+    }
+
+    .sleepStatus{
+      position:absolute;
+      bottom:-44px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(11,16,40,.92);
+      color:var(--text);
+      box-shadow:var(--shadow);
+      z-index:110;
+      display:none;
+    }
+
+    .toast.show{
+      display:block;
+      animation:toastIn .25s ease;
+    }
+
+    @keyframes toastIn{
+      from{opacity:0;transform:translateX(-50%) translateY(8px)}
+      to{opacity:1;transform:translateX(-50%) translateY(0)}
+    }
+
+    .modalOverlay,.surveyGate,.poopGameContainer,.endingScreen{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.62);
+      backdrop-filter:blur(4px);
+      display:none;
+      place-items:center;
+      z-index:100;
+    }
+
     .modalOverlay.show,.surveyGate.show,.endingScreen.show{display:grid}
     .poopGameContainer.show{display:flex}
+
     .modalBox{
-      background:rgba(11,16,40,.96);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;
-      max-width:560px;width:min(92vw,560px);max-height:84vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)
+      background:rgba(11,16,40,.96);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:20px;
+      padding:24px;
+      max-width:560px;
+      width:min(92vw,560px);
+      max-height:84vh;
+      overflow:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
     }
+
     .modalBox h2{margin:0 0 8px;font-size:18px}
     .modalBox p,.modalBox small{color:var(--muted);line-height:1.7}
-    .modalBtn{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-    .modalBtn button{flex:1;min-width:140px}
-    .pairCard{margin-top:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
-    .pairProgress{font-size:12px;color:var(--muted);margin-bottom:8px}
-    .pairTitle{font-size:16px;font-weight:800;margin-bottom:12px}
-    .pairBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .choiceModalBtn{min-height:86px;display:flex;align-items:center;justify-content:center;font-size:16px}
-    .historyHint{font-size:12px;color:var(--muted);margin-top:12px}
-    .poopGameContainer{flex-direction:column;align-items:center;justify-content:center;gap:20px;background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:120}
+
+    .modalBtn{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .modalBtn button{
+      flex:1;
+      min-width:140px;
+    }
+
+    .pairCard{
+      margin-top:12px;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    .pairProgress{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .pairTitle{
+      font-size:16px;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+
+    .pairBtns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .choiceModalBtn{
+      min-height:86px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+    }
+
+    .historyHint{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:12px;
+    }
+
+    .poopGameContainer{
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
+      z-index:120;
+    }
+
     .poopGameTitle{font-size:32px;font-weight:900}
-    .poopGameArea{width:320px;height:320px;border:2px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.03);position:relative;overflow:hidden}
-    .poop{position:absolute;width:42px;height:42px;display:grid;place-items:center;font-size:28px;cursor:pointer;user-select:none;animation:poopBounce .6s ease-out}
-    @keyframes poopBounce{0%{transform:scale(0);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+    .poopGameArea{
+      width:320px;
+      height:320px;
+      border:2px solid rgba(255,255,255,.2);
+      border-radius:20px;
+      background:rgba(255,255,255,.03);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .poop{
+      position:absolute;
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      font-size:28px;
+      cursor:pointer;
+      user-select:none;
+      animation:poopBounce .6s ease-out;
+    }
+
+    @keyframes poopBounce{
+      0%{transform:scale(0);opacity:1}
+      50%{transform:scale(1.1)}
+      100%{transform:scale(1)}
+    }
+
     .poop:hover{transform:scale(1.14)}
     .poopScore{font-size:24px;font-weight:800}
     .poopHint{font-size:12px;color:var(--muted)}
-    .surveyGate{background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:90}
-    .surveyPanel{width:min(92vw,520px);padding:28px;border-radius:24px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);text-align:center;box-shadow:var(--shadow)}
-    .surveyPanel .icon{font-size:58px;margin-bottom:10px;animation:bounce 1.2s ease infinite}
-    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    .surveyPanel .title{font-size:24px;font-weight:900;margin-bottom:10px}
-    .surveyPanel .desc{color:var(--muted);line-height:1.7;margin-bottom:18px}
-    .endingScreen .thanks{font-size:42px;font-weight:900;letter-spacing:.08em}
-    .endingScreen .sub{margin-top:12px;color:var(--muted);text-align:center;line-height:1.8}
-    .logList{display:flex;flex-direction:column;gap:12px}
-    .logDay{padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.03)}
-    .logDay h3{margin:0 0 8px;font-size:14px}
-    .logDay ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.7}
+
+    .surveyGate{
+      background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
+      z-index:90;
+    }
+
+    .surveyPanel{
+      width:min(92vw,520px);
+      padding:28px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+      text-align:center;
+      box-shadow:var(--shadow);
+    }
+
+    .surveyPanel .icon{
+      font-size:58px;
+      margin-bottom:10px;
+      animation:bounce 1.2s ease infinite;
+    }
+
+    @keyframes bounce{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-10px)}
+    }
+
+    .surveyPanel .title{
+      font-size:24px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    .surveyPanel .desc{
+      color:var(--muted);
+      line-height:1.7;
+      margin-bottom:18px;
+    }
+
+    .endingScreen .thanks{
+      font-size:42px;
+      font-weight:900;
+      letter-spacing:.08em;
+    }
+
+    .endingScreen .sub{
+      margin-top:12px;
+      color:var(--muted);
+      text-align:center;
+      line-height:1.8;
+    }
+
+    .logList{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .logDay{
+      padding:12px;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .logDay h3{
+      margin:0 0 8px;
+      font-size:14px;
+    }
+
+    .logDay ul{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      line-height:1.7;
+    }
   </style>
 </head>
 <body>
@@ -271,7 +668,7 @@
   <div class="surveyPanel">
     <div class="icon">📋</div>
     <div class="title">ゲーム開始前に</div>
-    <div class="desc">アンケートに進むと、そのまま回答してこの画面へ戻れます。<br>戻ったあとも今の状態は消えません。</div>
+    <div class="desc">最初にアンケートへ進みます。<br>送信後に戻ると、このままゲームが始まります。</div>
     <button id="btnGoSurvey" style="width:100%; margin-bottom:10px;">アンケートへ進む</button>
     <button id="btnSkipSurvey" class="btnGhost" style="width:100%;">あとで</button>
   </div>
@@ -340,9 +737,14 @@
   "use strict";
 
   const SAVE_KEY = "tosewa_save_v2";
-  const SURVEY_DONE_KEY = "osewa_survey_done_v1";
-  const SURVEY_DONE_AT = "osewa_survey_done_at_v1";
-  const SURVEY_ANSWERS_KEY = "osewa_survey_answers_v1";
+
+  const GIFT_SURVEY_DONE_KEY = "gift_survey_done";
+  const GIFT_SURVEY_DONE_AT  = "gift_survey_done_at";
+  const GIFT_SURVEY_PID_KEY  = "gift_pid";
+
+  const OSEWA_SURVEY_DONE_KEY = "osewa_survey_done_v1";
+  const OSEWA_SURVEY_DONE_AT  = "osewa_survey_done_at_v1";
+  const OSEWA_SURVEY_PID_KEY  = "osewa_pid_v1";
 
   const HATCH_MS = 10000;
   const DAY_LENGTH_MS = 3600000;
@@ -458,7 +860,6 @@
       createdAt: new Date().toISOString(),
       ended: false,
       endedAt: null,
-      thankYouShown: false,
       hatched: false,
       name: "???",
       heart: 5,
@@ -475,8 +876,7 @@
       sleepStartedAt: null,
       pauseAccumMs: 0,
       pausedSince: null,
-      lastSimElapsed: 0,
-      surveySeen: false
+      lastSimElapsed: 0
     };
   }
 
@@ -494,7 +894,9 @@
   }
 
   function saveSave(save){
-    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(_){ }
+    try{
+      localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+    }catch(_){}
   }
 
   function now(){ return Date.now(); }
@@ -505,35 +907,21 @@
     return Math.max(0, atNow - created - (save.pauseAccumMs || 0) - currentPause);
   }
 
-  function checkSurveyDone(){
-    return localStorage.getItem(SURVEY_DONE_KEY) === "1";
+  function isSurveyDone(){
+    return localStorage.getItem(GIFT_SURVEY_DONE_KEY) === "1"
+        || localStorage.getItem(OSEWA_SURVEY_DONE_KEY) === "1";
   }
 
-  function buildSurveyUrl(){
-    const current = new URL(location.href);
-    current.searchParams.delete("done");
-    const surveyUrl = new URL("./survey.html", current.href);
-    surveyUrl.searchParams.set("return", current.toString());
-    return surveyUrl.toString();
-  }
-
-  function showSurveyGate(){ ui.surveyGate.classList.add("show"); }
-  function hideSurveyGate(){ ui.surveyGate.classList.remove("show"); }
-
-  function initSurveyCheck(){
-    const url = new URL(location.href);
-    if(url.searchParams.get("done") === "1"){
-      localStorage.setItem(SURVEY_DONE_KEY, "1");
-      localStorage.setItem(SURVEY_DONE_AT, new Date().toISOString());
-      url.searchParams.delete("done");
-      history.replaceState({}, "", url.toString());
-      showToast("アンケートありがとう。ゲームに戻りました。");
-    }
-    if(checkSurveyDone()){
-      hideSurveyGate();
+  function initSurveyGate(){
+    if(isSurveyDone()){
+      ui.surveyGate.classList.remove("show");
     }else{
-      showSurveyGate();
+      ui.surveyGate.classList.add("show");
     }
+  }
+
+  function openSurveyPage(){
+    location.href = "./survey.html";
   }
 
   function showToast(message){
@@ -549,7 +937,11 @@
   }
 
   function pushLiveLog(save, text){
-    save.events.push({ t: new Date().toISOString(), day: save.day, text });
+    save.events.push({
+      t: new Date().toISOString(),
+      day: save.day,
+      text
+    });
   }
 
   function addChoice(save, category, text){
@@ -566,7 +958,9 @@
     }
   }
 
-  function round1(v){ return Math.round(v * 10) / 10; }
+  function round1(v){
+    return Math.round(v * 10) / 10;
+  }
 
   function isSleeping(save, elapsed){
     return !!save.sleepStartedAt && (elapsed - save.sleepStartedAt) < SLEEP_MS;
@@ -587,8 +981,10 @@
 
   function maybeEnd(save, elapsed){
     if(save.ended) return;
+
     const finishedTime = elapsed >= DAY_LENGTH_MS * TOTAL_DAYS;
     const noHeart = save.heart <= 0;
+
     if(finishedTime || noHeart){
       save.ended = true;
       save.endedAt = new Date().toISOString();
@@ -609,6 +1005,7 @@
 
   function applyPassiveChange(save, elapsed){
     if(save.pausedSince || save.ended) return;
+
     const prev = save.lastSimElapsed || 0;
     const dt = Math.max(0, elapsed - prev) / 1000;
     if(!dt) return;
@@ -650,7 +1047,8 @@
         <circle cx="98" cy="138" r="6" fill="#fff" opacity=".85"/>
         <circle cx="162" cy="136" r="6" fill="#fff" opacity=".85"/>
         <path d="M112 170c10 8 26 8 36 0" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none" opacity=".8"/>
-      </svg>`;
+      </svg>
+    `;
     return svgToData(svg);
   }
 
@@ -686,7 +1084,8 @@
         <circle cx="170" cy="162" r="12" fill="#fda4af" ${blush}/>
         ${eyes}
         ${mouth}
-      </svg>`;
+      </svg>
+    `;
     return svgToData(svg);
   }
 
@@ -731,17 +1130,19 @@
       ui.countdownText.textContent = "記録のみ";
       return;
     }
+
     if(!save.hatched){
       const left = Math.max(0, HATCH_MS - elapsed);
       const s = Math.ceil(left / 1000);
       ui.countdownText.textContent = `ふかまで ${s}秒`;
       return;
     }
+
     const left = Math.max(0, DAY_LENGTH_MS * TOTAL_DAYS - elapsed);
     const day = Math.min(TOTAL_DAYS, Math.floor(elapsed / DAY_LENGTH_MS) + 1);
-    const hh = Math.floor((left % DAY_LENGTH_MS) / 60000);
-    const mm = Math.floor((left % 60000) / 1000);
-    ui.countdownText.textContent = `Day ${day} の途中 ${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+    const mm = Math.floor((left % DAY_LENGTH_MS) / 60000);
+    const ss = Math.floor((left % 60000) / 1000);
+    ui.countdownText.textContent = `Day ${day} の途中 ${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
   }
 
   function hatchIfNeeded(save, elapsed){
@@ -755,6 +1156,7 @@
 
   function maybeAutoSleep(save, elapsed){
     if(!save.hatched || save.ended || save.pausedSince || isSleeping(save, elapsed)) return;
+
     const idle = elapsed - (save.lastActionElapsed || 0);
     if(idle >= IDLE_SLEEP_AFTER_MS){
       startSleep(save, elapsed, "静かだから寝てしまった");
@@ -811,6 +1213,7 @@
 
   function hiddenDelta(kind, index, side){
     const seed = ((index + 1) * (side + 2) + kind.length) % 5;
+
     if(kind === "food"){
       const map = [
         { heart: 0.8, hunger: -2.2, tired: 0.2 },
@@ -821,6 +1224,7 @@
       ];
       return map[seed];
     }
+
     if(kind === "out"){
       const map = [
         { heart: 0.8, tired: 0.6, hunger: 0.4 },
@@ -831,6 +1235,7 @@
       ];
       return map[seed];
     }
+
     const map = [
       { heart: 0.8, mood: 0.6 },
       { heart: 0.5, mood: 0.3 },
@@ -849,20 +1254,25 @@
     save.mood = clamp(save.mood + (delta.mood || 0), -10, 10);
   }
 
-  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+  function clamp(v, min, max){
+    return Math.min(max, Math.max(min, v));
+  }
 
   function selectCurrentChoice(side){
     if(!currentChoiceContext) return;
+
     const save = loadSave();
     if(!save || save.ended) return;
 
     const { kind, cursorKey, index, pair } = currentChoiceContext;
     const selected = pair[side];
+
     applyDelta(save, hiddenDelta(kind, index, side));
     save.cursors[cursorKey] += 1;
     touchAction(save);
 
     const label = `${pair[0]} / ${pair[1]} → ${selected}`;
+
     if(kind === "food"){
       pushLiveLog(save, `ごはんで「${selected}」を選んだ`);
       addChoice(save, "Food", label);
@@ -884,6 +1294,7 @@
   function actDrink(){
     const save = loadSave();
     if(!save || save.ended || !save.hatched) return;
+
     save.heart = clamp(save.heart + 1.2, 0, 10);
     save.tired = clamp(save.tired - 1.2, 0, 10);
     pushLiveLog(save, "ドリンクをあげた");
@@ -901,6 +1312,7 @@
       return;
     }
     if(!save.hatched) return;
+
     save.heart = clamp(save.heart + 1.8, 0, 10);
     save.hunger = clamp(save.hunger - 0.8, 0, 10);
     pushLiveLog(save, "マカロンをあげた");
@@ -913,6 +1325,7 @@
   function startPoopGame(){
     const save = loadSave();
     if(!save || save.ended || !save.hatched) return;
+
     ui.poopGame.classList.add("show");
     poopGameState = { count: 0, target: POOP_COUNT_TARGET };
     ui.poopGameArea.innerHTML = "";
@@ -924,24 +1337,29 @@
     const area = ui.poopGameArea;
     const w = area.clientWidth;
     const h = area.clientHeight;
+
     for(let i = 0; i < 3; i++){
       setTimeout(() => {
         if(!ui.poopGame.classList.contains("show") || poopGameState.count >= poopGameState.target) return;
+
         const poop = document.createElement("div");
         poop.className = "poop";
         poop.textContent = "💩";
         poop.style.left = Math.random() * (w - 42) + "px";
         poop.style.top = Math.random() * (h - 42) + "px";
+
         poop.addEventListener("click", () => {
           poopGameState.count += 1;
           updatePoopScore();
           poop.remove();
+
           if(poopGameState.count >= poopGameState.target){
             setTimeout(endPoopGame, 250);
           }else{
             setTimeout(spawnPoops, 240);
           }
         }, { once: true });
+
         area.appendChild(poop);
       }, i * 260);
     }
@@ -953,10 +1371,13 @@
 
   function endPoopGame(){
     if(!ui.poopGame.classList.contains("show")) return;
+
     ui.poopGame.classList.remove("show");
     ui.poopGameArea.innerHTML = "";
+
     const save = loadSave();
     if(!save || save.ended) return;
+
     if(poopGameState.count > 0){
       save.dirty = clamp(save.dirty - 3.0, 0, 10);
       save.heart = clamp(save.heart + 0.8, 0, 10);
@@ -995,6 +1416,7 @@
   function openLogs(){
     const save = loadSave();
     if(!save) return;
+
     const groups = buildDayLogs(save);
     ui.logsContent.innerHTML = groups.map(group => `
       <div class="logDay">
@@ -1002,6 +1424,7 @@
         <ul>${group.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
       </div>
     `).join("");
+
     ui.logsModal.classList.add("show");
   }
 
@@ -1011,6 +1434,7 @@
 
   function buildDayLogs(save){
     const result = [];
+
     for(let day = 1; day <= TOTAL_DAYS; day++){
       const items = [];
       const dayEvents = (save.events || []).filter(e => e.day === day).map(e => e.text);
@@ -1020,6 +1444,7 @@
       const clean = save.choices[`day${day}_Clean`] || [];
       const drink = save.choices[`day${day}_Drink`] || [];
       const macaron = save.choices[`day${day}_Macaron`] || [];
+
       items.push(`ハートの最後: ${round1(getDayHeart(save, day))}`);
       if(food.length) items.push(`ごはん: ${food.join(" / ")}`);
       if(out.length) items.push(`おでかけ: ${out.join(" / ")}`);
@@ -1029,8 +1454,10 @@
       if(macaron.length) items.push(`マカロン: ${macaron.length}回`);
       if(dayEvents.length) items.push(...dayEvents);
       if(!items.length) items.push("まだ記録がありません。");
+
       result.push({ day, items });
     }
+
     return result;
   }
 
@@ -1052,6 +1479,7 @@
   function toggleSitter(){
     const save = loadSave();
     if(!save || save.ended) return;
+
     if(!save.pausedSince){
       save.pausedSince = now();
       pushLiveLog(save, "シッター開始");
@@ -1063,6 +1491,7 @@
       pushLiveLog(save, `シッター終了 (${Math.round(paused / 1000)}秒)`);
       showToast("また時間が動きはじめます。");
     }
+
     saveSave(save);
     ui.sitterToggle.dataset.on = save.pausedSince ? "true" : "false";
   }
@@ -1070,8 +1499,10 @@
   function changeName(){
     const save = loadSave();
     if(!save || save.ended) return;
+
     const newName = prompt("名前を入力してください:", save.name === "???" ? "" : save.name);
     if(!newName || !newName.trim()) return;
+
     save.name = newName.trim();
     pushLiveLog(save, `名前が「${save.name}」に決まった`);
     saveSave(save);
@@ -1109,15 +1540,14 @@
     [ui.btnFood, ui.btnOut, ui.btnStyle, ui.btnClean, ui.btnDrink, ui.btnMacaron, ui.btnName].forEach(btn => {
       btn.disabled = disabled;
     });
+
     if(disabled){
       ui.charStatus.textContent = "記録だけが残っている";
     }
   }
 
-  ui.btnGoSurvey.addEventListener("click", () => {
-    location.href = buildSurveyUrl();
-  });
-  ui.btnSkipSurvey.addEventListener("click", hideSurveyGate);
+  ui.btnGoSurvey.addEventListener("click", openSurveyPage);
+  ui.btnSkipSurvey.addEventListener("click", () => ui.surveyGate.classList.remove("show"));
 
   ui.btnFood.addEventListener("click", () => openChoiceModal("food"));
   ui.btnOut.addEventListener("click", () => openChoiceModal("out"));
@@ -1138,7 +1568,10 @@
 
   ui.btnLogs.addEventListener("click", openLogs);
   ui.btnLogsClose.addEventListener("click", closeLogs);
-  ui.btnEndingLogs.addEventListener("click", () => { hideEnding(); openLogs(); });
+  ui.btnEndingLogs.addEventListener("click", () => {
+    hideEnding();
+    openLogs();
+  });
   ui.btnEndingClose.addEventListener("click", hideEnding);
   ui.btnPoopExit.addEventListener("click", endPoopGame);
 
@@ -1151,7 +1584,7 @@
     });
   });
 
-  initSurveyCheck();
+  initSurveyGate();
 
   let save = loadSave();
   if(!save){
@@ -1161,10 +1594,12 @@
   }
 
   render();
+
   function tick(){
     render();
     requestAnimationFrame(tick);
   }
+
   tick();
 })();
 </script>
