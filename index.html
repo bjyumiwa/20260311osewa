@@ -101,6 +101,14 @@
       overflow:hidden;
     }
     .hearts > i{
+      // 修正後:
+function buildReturnUrl(){
+  const u = new URL(location.href);
+  u.hash = "";
+  u.pathname = u.pathname.replace(/survey\.html$/,"index_improved.html");
+  u.searchParams.set("done","1");
+  return u.toString();
+}
       display:block; height:100%; width:50%;
       background: linear-gradient(90deg, rgba(196,181,253,.95), rgba(147,197,253,.95));
       box-shadow: 0 0 14px rgba(147,197,253,.25);
