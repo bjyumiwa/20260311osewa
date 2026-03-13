@@ -1,0 +1,1199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>3日間のお世話ゲーム</title>
+  <style>
+    :root{
+      --bg0:#050816;
+      --bg1:#0b1028;
+      --card:rgba(255,255,255,.08);
+      --text:#eef2ff;
+      --muted:rgba(238,242,255,.72);
+      --line:rgba(255,255,255,.14);
+      --shadow:0 14px 40px rgba(0,0,0,.35);
+      --radius:18px;
+      --accent1:#c4b5fd;
+      --accent2:#93c5fd;
+      --success:#b9f6ca;
+      --warn:#ffd6a5;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+      background:
+        linear-gradient(180deg, rgba(5,8,22,.55), rgba(11,16,40,.78)),
+        url("space_background.png") center/cover no-repeat fixed,
+        linear-gradient(180deg, rgba(5,8,22,.95), rgba(11,16,40,.98));
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .wrap{max-width:1120px;margin:0 auto;padding:18px 14px 40px}
+    .topbar{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05);
+      border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:10px;z-index:20;
+      backdrop-filter:blur(10px)
+    }
+    .brand{display:flex;gap:10px;align-items:center}
+    .brand .dot{
+      width:12px;height:12px;border-radius:999px;
+      background:linear-gradient(180deg,var(--accent1),var(--accent2));
+      box-shadow:0 0 18px rgba(196,181,253,.35)
+    }
+    .brand .title{font-weight:800;font-size:14px}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .statusRow{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex:1;flex-wrap:wrap}
+    .pill,.statusPill{
+      display:flex;align-items:center;gap:8px;min-height:34px;padding:8px 10px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.05)
+    }
+    .statusPill{font-size:13px;font-weight:700}
+    .heartIcon{font-size:15px;line-height:1}
+    .hearts{width:140px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);overflow:hidden}
+    .hearts > i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .25s ease}
+    .toggle{cursor:pointer;user-select:none}
+    .switch{width:42px;height:24px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);position:relative;transition:.18s ease}
+    .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.85);box-shadow:0 8px 14px rgba(0,0,0,.25);transition:.18s ease}
+    .toggle[data-on="true"] .switch{background:rgba(154,230,180,.18);border-color:rgba(154,230,180,.28)}
+    .toggle[data-on="true"] .switch::after{left:20px;background:rgba(154,230,180,.95)}
+
+    .main{margin-top:14px;display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:start}
+    @media (max-width:900px){.main{grid-template-columns:1fr}}
+
+    .card{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .cardHeader{padding:12px 12px 10px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .cardHeader .h{font-weight:800;font-size:14px}
+    .cardHeader .hint{font-size:12px;color:var(--muted);margin-top:2px}
+    .cardContent{padding:12px}
+
+    button{
+      appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);
+      border-radius:14px;padding:12px 10px;cursor:pointer;font-weight:700;letter-spacing:.01em;
+      box-shadow:0 12px 26px rgba(0,0,0,.22);transition:transform .08s ease,background .18s ease,border-color .18s ease,opacity .18s ease
+    }
+    button:hover{transform:translateY(-1px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
+    button:active{transform:translateY(0) scale(.99)}
+    button[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+    .btnGhost{background:rgba(255,255,255,.03)}
+
+    .choiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+    .choiceBtn{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:86px;
+      padding:16px 12px!important;border-radius:16px;background:rgba(255,255,255,.06)!important;border:1.5px solid rgba(255,255,255,.14)!important
+    }
+    .choiceBtn .icon{font-size:32px;line-height:1}
+    .choiceBtn .label{font-size:13px;font-weight:800;text-align:center;line-height:1.3}
+    .choiceBtn .sub{font-size:11px;color:var(--muted);text-align:center}
+
+    .stage{position:relative;min-height:560px;padding:14px;overflow:hidden}
+    .stars{position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:
+      radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+      radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 85% 75%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+      radial-gradient(circle at 25% 50%, rgba(255,255,255,.55) 0 1px, transparent 2px);
+      background-size:420px 260px;animation:drift 18s linear infinite}
+    @keyframes drift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-80px,50px,0)}}
+    .center{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;z-index:10}
+    .entity{width:300px;height:300px;display:grid;place-items:center;position:relative}
+    .floaty{animation:floaty 3s ease-in-out infinite}
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+    .entityBubble{
+      position:absolute;top:-2px;right:4px;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+      font-size:12px;color:var(--muted);backdrop-filter:blur(8px)
+    }
+
+    .entityVisual{
+      width:100%;height:100%;display:grid;place-items:center;position:relative;
+      transform-origin:50% 60%;transition:transform .35s ease;
+    }
+    .entityImg{
+      width:260px;height:260px;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(0,0,0,.38));
+      transition:transform .35s ease, opacity .25s ease;
+    }
+
+    .tear{
+      position:absolute;width:14px;height:22px;border-radius:50% 50% 60% 60%;
+      background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(120,212,255,.85));
+      box-shadow:0 0 10px rgba(120,212,255,.38);opacity:0;pointer-events:none
+    }
+    .tear.left{left:114px;top:122px}
+    .tear.right{right:114px;top:122px}
+    .crying .tear{opacity:1;animation:tearFall 1.6s ease-in-out infinite}
+    .crying .tear.right{animation-delay:.38s}
+    @keyframes tearFall{
+      0%{transform:translateY(0) scale(.7);opacity:0}
+      18%{opacity:1}
+      72%{opacity:1}
+      100%{transform:translateY(54px) scale(1);opacity:0}
+    }
+
+    .sleepStatus{position:absolute;bottom:-42px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
+    .growthNote{font-size:12px;color:var(--muted);margin-top:6px}
+
+    .toast{
+      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
+      background:rgba(11,16,40,.92);color:var(--text);box-shadow:var(--shadow);z-index:110;display:none
+    }
+    .toast.show{display:block;animation:toastIn .25s ease}
+    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+    .modalOverlay,.surveyGate,.poopGameContainer,.endingScreen{
+      position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);display:none;place-items:center;z-index:100
+    }
+    .modalOverlay.show,.surveyGate.show,.endingScreen.show{display:grid}
+    .poopGameContainer.show{display:flex}
+
+    .modalBox{
+      background:rgba(11,16,40,.96);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;
+      max-width:560px;width:min(92vw,560px);max-height:84vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)
+    }
+    .modalBox h2{margin:0 0 8px;font-size:18px}
+    .modalBox p,.modalBox small{color:var(--muted);line-height:1.7}
+    .modalBtn{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .modalBtn button{flex:1;min-width:140px}
+
+    .pairCard{margin-top:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+    .pairProgress{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .pairTitle{font-size:16px;font-weight:800;margin-bottom:12px}
+    .pairBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .choiceModalBtn{min-height:86px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .historyHint{font-size:12px;color:var(--muted);margin-top:12px}
+
+    .poopGameContainer{
+      flex-direction:column;align-items:center;justify-content:center;gap:20px;background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:120
+    }
+    .poopGameTitle{font-size:32px;font-weight:900}
+    .poopGameArea{width:320px;height:320px;border:2px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.03);position:relative;overflow:hidden}
+    .poop{position:absolute;width:42px;height:42px;display:grid;place-items:center;font-size:28px;cursor:pointer;user-select:none;animation:poopBounce .6s ease-out}
+    @keyframes poopBounce{0%{transform:scale(0);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+    .poop:hover{transform:scale(1.14)}
+    .poopScore{font-size:24px;font-weight:800}
+    .poopHint{font-size:12px;color:var(--muted)}
+
+    .surveyGate{background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:90}
+    .surveyPanel{width:min(92vw,560px);padding:28px;border-radius:24px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);text-align:center;box-shadow:var(--shadow)}
+    .surveyPanel .icon{font-size:58px;margin-bottom:10px;animation:bounce 1.2s ease infinite}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .surveyPanel .title{font-size:24px;font-weight:900;margin-bottom:10px}
+    .surveyPanel .desc{color:var(--muted);line-height:1.7;margin-bottom:18px}
+
+    .endingScreen .thanks{font-size:42px;font-weight:900;letter-spacing:.08em}
+    .endingScreen .sub{margin-top:12px;color:var(--muted);text-align:center;line-height:1.8}
+
+    .logList{display:flex;flex-direction:column;gap:12px}
+    .logDay{padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.03)}
+    .logDay h3{margin:0 0 8px;font-size:14px}
+    .logDay ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.7}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">お世話ゲーム</div>
+        <div class="sub">Day <span id="dayNum">1</span> / 3</div>
+      </div>
+    </div>
+    <div class="statusRow">
+      <div class="statusPill" id="statusText">静かな時間</div>
+      <div class="pill">
+        <span class="heartIcon">💗</span>
+        <div class="hearts"><i id="heartFill"></i></div>
+        <small id="heartVal">?/10</small>
+      </div>
+      <div class="pill toggle" id="sitterToggle" data-on="false" title="Sitter Mode">
+        <small>シッター</small>
+        <div class="switch"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="cardHeader">
+        <div>
+          <div class="h">キャラ</div>
+          <div class="hint" id="charStatus">準備中...</div>
+        </div>
+      </div>
+      <div class="cardContent" style="position:relative; min-height:560px; padding:0;">
+        <div class="stage">
+          <div class="stars"></div>
+          <div class="center">
+            <div class="entity floaty">
+              <div class="entityBubble" id="entityBubble">まってる</div>
+              <div class="entityVisual" id="entityVisual">
+                <img id="entityImg" class="entityImg" alt="character">
+                <i class="tear left"></i>
+                <i class="tear right"></i>
+              </div>
+              <div class="sleepStatus" id="sleepStatus"></div>
+            </div>
+            <div class="growthNote" id="growthNote">マカロンは3分後に生まれます</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">
+        <div>
+          <div class="h">コマンド</div>
+          <div class="hint">ごはんは20種類の2択を順番に出します</div>
+        </div>
+        <button style="width:auto; padding:8px 10px; font-size:11px;" id="btnLetter">💌 手紙を読む</button>
+      </div>
+      <div class="cardContent">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div>
+            <small style="color:var(--muted); display:block; margin-bottom:4px;">ごはん</small>
+            <div class="choiceGrid">
+              <button class="choiceBtn" id="btnFood">
+                <span class="icon">🍚</span>
+                <span class="label">ごはん</span>
+                <span class="sub">20この2たく</span>
+              </button>
+              <button class="choiceBtn" id="btnOut">
+                <span class="icon">🌳</span>
+                <span class="label">おでかけ</span>
+                <span class="sub">2たく</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <small style="color:var(--muted); display:block; margin-bottom:4px;">遊び</small>
+            <div class="choiceGrid">
+              <button class="choiceBtn" id="btnStyle">
+                <span class="icon">✨</span>
+                <span class="label">スタイル</span>
+                <span class="sub">2たく</span>
+              </button>
+              <button class="choiceBtn" id="btnDrink">
+                <span class="icon">🧃</span>
+                <span class="label">ドリンク</span>
+                <span class="sub">少し元気</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <small style="color:var(--muted); display:block; margin-bottom:4px;">ケア</small>
+            <div class="choiceGrid">
+              <button class="choiceBtn" id="btnClean">
+                <span class="icon">🧹</span>
+                <span class="label">そうじ</span>
+                <span class="sub">💩ゲーム</span>
+              </button>
+              <button class="choiceBtn" id="btnMacaron">
+                <span class="icon">🍪</span>
+                <span class="label">マカロン</span>
+                <span class="sub">少し回復</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,.08); margin:12px 0;">
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button style="width:100%;" id="btnName">名前を決める</button>
+          <button style="width:100%;" class="btnGhost" id="btnLogs">📊 ログ</button>
+          <button style="width:100%;" class="btnGhost" id="btnReset">🔄 リセット</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="surveyGate" id="surveyGate">
+  <div class="surveyPanel">
+    <div class="icon">📋</div>
+    <div class="title">ゲーム開始前に</div>
+    <div class="desc">アンケートに回答したあと、Googleフォームの送信完了画面にあるリンクからこのゲームへ戻ります。</div>
+    <button id="btnGoSurvey" style="width:100%;">アンケートへ進む</button>
+  </div>
+</div>
+
+<div class="modalOverlay" id="choiceModal">
+  <div class="modalBox">
+    <h2 id="choiceModalTitle">2択</h2>
+    <small id="choiceModalDesc">どちらかを選ぶ</small>
+    <div class="pairCard">
+      <div class="pairProgress" id="choiceProgress">1 / 20</div>
+      <div class="pairTitle" id="choiceQuestion">どっちにする？</div>
+      <div class="pairBtns">
+        <button class="choiceModalBtn" id="choiceLeft">左</button>
+        <button class="choiceModalBtn" id="choiceRight">右</button>
+      </div>
+    </div>
+    <div class="historyHint" id="choiceHint">選ぶたびに次の2択へ進みます。</div>
+    <div class="modalBtn">
+      <button class="btnGhost" id="btnChoiceClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalOverlay" id="letterModal">
+  <div class="modalBox">
+    <h2>💌 お手紙</h2>
+    <div style="background:rgba(255,255,255,.05); border-radius:12px; padding:16px; margin:16px 0; line-height:1.8; white-space:pre-wrap; font-size:13px; color:var(--muted);" id="letterContent"></div>
+    <button style="width:100%; margin-top:16px;" id="btnLetterClose">手紙を閉じる</button>
+  </div>
+</div>
+
+<div class="modalOverlay" id="logsModal">
+  <div class="modalBox">
+    <h2>3日間の記録</h2>
+    <div class="logList" id="logsContent"></div>
+    <div class="modalBtn">
+      <button id="btnLogsClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="poopGameContainer" id="poopGame">
+  <div class="poopGameTitle">そうじ</div>
+  <div class="poopGameArea" id="poopGameArea"></div>
+  <div class="poopScore" id="poopScore">0 / 5</div>
+  <div class="poopHint">💩をタップしてきれいにしよう</div>
+  <button id="btnPoopExit">終わる</button>
+</div>
+
+<div class="endingScreen" id="endingScreen">
+  <div class="modalBox" style="text-align:center;">
+    <div class="thanks">ありがとう</div>
+    <div class="sub">3日間の記録だけが、静かに残ります。</div>
+    <div class="modalBtn">
+      <button id="btnEndingLogs">ログを見る</button>
+      <button class="btnGhost" id="btnEndingClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ===== 保存キー =====
+  const SAVE_KEY = "tosewa_save_v3";
+  const GIFT_SURVEY_DONE_KEY = "gift_survey_done";
+  const GIFT_SURVEY_DONE_AT  = "gift_survey_done_at";
+  const OSEWA_SURVEY_DONE_KEY = "osewa_survey_done_v1";
+  const OSEWA_SURVEY_DONE_AT  = "osewa_survey_done_at_v1";
+
+  // ===== 時間設定 =====
+  // 本番は3分でふ化、3日で終了
+  const HATCH_MS = 3 * 60 * 1000;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const TOTAL_DAYS = 3;
+  const POOP_COUNT_TARGET = 5;
+
+  // ===== 2択 =====
+  const FOOD_CHOICES = [
+    ["ごはん", "パン"],
+    ["みそしる", "スープ"],
+    ["りんご", "バナナ"],
+    ["おにぎり", "サンドイッチ"],
+    ["おちゃ", "ジュース"],
+    ["うどん", "パスタ"],
+    ["いちご", "ぶどう"],
+    ["クッキー", "ビスケット"],
+    ["オムライス", "カレー"],
+    ["プリン", "ゼリー"],
+    ["コーンスープ", "ポタージュ"],
+    ["ミルク", "ヨーグルト"],
+    ["さかな", "おにく"],
+    ["たまごやき", "ハム"],
+    ["チーズ", "バター"],
+    ["ホットケーキ", "ワッフル"],
+    ["マカロン", "マシュマロ"],
+    ["トマト", "にんじん"],
+    ["ラーメン", "やきそば"],
+    ["おもち", "どらやき"]
+  ];
+
+  const OUT_CHOICES = [
+    ["外に出る", "家で過ごす"],
+    ["星を見る", "音を聞く"],
+    ["さんぽ", "ごろごろ"],
+    ["ひなたぼっこ", "日かげで休む"],
+    ["遠くへ行く", "近くで遊ぶ"],
+    ["ひとりで歩く", "いっしょに歩く"],
+    ["風にあたる", "ぬくぬくする"],
+    ["雲を見る", "床にころぶ"],
+    ["月を見る", "明かりを見る"],
+    ["のんびり進む", "ちょっと急ぐ"]
+  ];
+
+  const STYLE_CHOICES = [
+    ["ぼうし", "りぼん"],
+    ["キラキラ", "ふわふわ"],
+    ["青い飾り", "紫の飾り"],
+    ["ほし模様", "月模様"],
+    ["まるい感じ", "すっとした感じ"],
+    ["やわらかい光", "つよい光"],
+    ["うさみみ風", "たれみみ風"],
+    ["小さめ", "ふっくら"],
+    ["静かな色", "にぎやかな色"],
+    ["おだやか", "元気"]
+  ];
+
+  // ===== 画像 =====
+  const COLORS = ["blue", "green", "pink", "purple"];
+  const ASSETS = {
+    blue: {
+      macaron: "macaron_blue.png",
+      open: "blue_open.png",
+      closed: "blue_closed.png",
+      sleep: "blue_sleep.png"
+    },
+    green: {
+      macaron: "macaron_green.png",
+      open: "green_open.png",
+      closed: "green_closed.png",
+      sleep: "green_sleep.png"
+    },
+    pink: {
+      macaron: "macaron_pink.png",
+      open: "pink_open.png",
+      closed: "pink_closed.png",
+      sleep: "pink_sleep.png"
+    },
+    purple: {
+      macaron: "macaron_purple.png",
+      open: "purple_open.png",
+      closed: "purple_closed.png",
+      sleep: "purple_sleep.png"
+    }
+  };
+
+  const ui = {
+    dayNum: document.getElementById("dayNum"),
+    statusText: document.getElementById("statusText"),
+    heartFill: document.getElementById("heartFill"),
+    heartVal: document.getElementById("heartVal"),
+    sitterToggle: document.getElementById("sitterToggle"),
+    charStatus: document.getElementById("charStatus"),
+    entityImg: document.getElementById("entityImg"),
+    entityBubble: document.getElementById("entityBubble"),
+    entityVisual: document.getElementById("entityVisual"),
+    sleepStatus: document.getElementById("sleepStatus"),
+    growthNote: document.getElementById("growthNote"),
+
+    btnFood: document.getElementById("btnFood"),
+    btnOut: document.getElementById("btnOut"),
+    btnStyle: document.getElementById("btnStyle"),
+    btnClean: document.getElementById("btnClean"),
+    btnDrink: document.getElementById("btnDrink"),
+    btnMacaron: document.getElementById("btnMacaron"),
+    btnName: document.getElementById("btnName"),
+    btnReset: document.getElementById("btnReset"),
+    btnLogs: document.getElementById("btnLogs"),
+
+    surveyGate: document.getElementById("surveyGate"),
+    btnGoSurvey: document.getElementById("btnGoSurvey"),
+
+    choiceModal: document.getElementById("choiceModal"),
+    choiceModalTitle: document.getElementById("choiceModalTitle"),
+    choiceModalDesc: document.getElementById("choiceModalDesc"),
+    choiceProgress: document.getElementById("choiceProgress"),
+    choiceQuestion: document.getElementById("choiceQuestion"),
+    choiceLeft: document.getElementById("choiceLeft"),
+    choiceRight: document.getElementById("choiceRight"),
+    btnChoiceClose: document.getElementById("btnChoiceClose"),
+    choiceHint: document.getElementById("choiceHint"),
+
+    letterModal: document.getElementById("letterModal"),
+    letterContent: document.getElementById("letterContent"),
+    btnLetter: document.getElementById("btnLetter"),
+    btnLetterClose: document.getElementById("btnLetterClose"),
+
+    logsModal: document.getElementById("logsModal"),
+    logsContent: document.getElementById("logsContent"),
+    btnLogsClose: document.getElementById("btnLogsClose"),
+
+    poopGame: document.getElementById("poopGame"),
+    poopGameArea: document.getElementById("poopGameArea"),
+    poopScore: document.getElementById("poopScore"),
+    btnPoopExit: document.getElementById("btnPoopExit"),
+
+    endingScreen: document.getElementById("endingScreen"),
+    btnEndingLogs: document.getElementById("btnEndingLogs"),
+    btnEndingClose: document.getElementById("btnEndingClose"),
+
+    toast: document.getElementById("toast")
+  };
+
+  let poopGameState = { count: 0, target: POOP_COUNT_TARGET };
+  let currentChoiceContext = null;
+
+  function createNewSave(){
+    return {
+      v: 3,
+      createdAt: new Date().toISOString(),
+      ended: false,
+      endedAt: null,
+      hatched: false,
+      name: "???",
+      colorId: Math.floor(Math.random() * COLORS.length),
+      heart: 5,
+      hunger: 2,
+      tired: 1,
+      dirty: 1,
+      mood: 0,
+      day: 1,
+      actionCount: 0,
+      cursors: { food: 0, out: 0, style: 0 },
+      choices: {},
+      events: [],
+      heartHistory: [{ t: 0, v: 5 }],
+      pauseAccumMs: 0,
+      pausedSince: null,
+      lastSimElapsed: 0,
+      lastCheckedAt: Date.now(),
+      sitterUsedMs: 0
+    };
+  }
+
+  function loadSave(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(_){
+      return null;
+    }
+  }
+
+  function saveSave(save){
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(_){ }
+  }
+
+  function now(){ return Date.now(); }
+
+  function calcElapsedMs(save, atNow = now()){
+    const created = new Date(save.createdAt).getTime();
+    const currentPause = save.pausedSince ? (atNow - save.pausedSince) : 0;
+    return Math.max(0, atNow - created - (save.pauseAccumMs || 0) - currentPause);
+  }
+
+  function round1(v){ return Math.round(v * 10) / 10; }
+  function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+  function isSurveyDone(){
+    return localStorage.getItem(GIFT_SURVEY_DONE_KEY) === "1"
+        || localStorage.getItem(OSEWA_SURVEY_DONE_KEY) === "1";
+  }
+
+  function markSurveyDone(){
+    const iso = new Date().toISOString();
+    localStorage.setItem(GIFT_SURVEY_DONE_KEY, "1");
+    localStorage.setItem(GIFT_SURVEY_DONE_AT, iso);
+    localStorage.setItem(OSEWA_SURVEY_DONE_KEY, "1");
+    localStorage.setItem(OSEWA_SURVEY_DONE_AT, iso);
+  }
+
+  function handleSurveyReturn(){
+    const url = new URL(location.href);
+    if(url.searchParams.get("survey") === "done"){
+      markSurveyDone();
+      url.searchParams.delete("survey");
+      history.replaceState({}, "", url.toString());
+      showToast("アンケートありがとう。ゲームを始めます。");
+    }
+  }
+
+  function openSurveyPage(){
+    const surveyUrl = new URL("./survey.html", location.href);
+    surveyUrl.searchParams.set("game", new URL("./index.html", location.href).toString());
+    location.href = surveyUrl.toString();
+  }
+
+  function showToast(message){
+    ui.toast.textContent = message;
+    ui.toast.classList.add("show");
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => ui.toast.classList.remove("show"), 2200);
+  }
+
+  function pushLiveLog(save, text){
+    save.events.push({ t: new Date().toISOString(), day: save.day, text });
+  }
+
+  function addChoice(save, category, text){
+    const key = `day${save.day}_${category}`;
+    if(!save.choices[key]) save.choices[key] = [];
+    save.choices[key].push(text);
+  }
+
+  function recordHeart(save){
+    const elapsed = calcElapsedMs(save);
+    const last = save.heartHistory[save.heartHistory.length - 1];
+    if(!last || last.v !== round1(save.heart)){
+      save.heartHistory.push({ t: elapsed, v: round1(save.heart) });
+    }
+  }
+
+  function getGrowthStage(save){
+    return Math.min(3, Math.floor((save.actionCount || 0) / 10));
+  }
+
+  function getGrowthScale(save){
+    const scales = [0.86, 0.98, 1.08, 1.18];
+    return scales[getGrowthStage(save)];
+  }
+
+  function getColorName(save){
+    return COLORS[save.colorId % COLORS.length];
+  }
+
+  function isNightTime(){
+    const h = new Date().getHours();
+    return h >= 23 || h < 6;
+  }
+
+  function isSick(save){
+    return save.hunger >= 7.8 || save.dirty >= 7.2 || save.tired >= 8.2 || save.heart <= 2.4;
+  }
+
+  function getAssetSet(save){
+    return ASSETS[getColorName(save)] || ASSETS.blue;
+  }
+
+  function pickImageForState(save){
+    const assets = getAssetSet(save);
+    if(!save.hatched) return assets.macaron;
+    if(isSick(save)) return assets.closed || assets.open;
+    if(isNightTime()) return assets.sleep || assets.open;
+    return assets.open || assets.sleep;
+  }
+
+  function updateEntityDisplay(save){
+    const img = pickImageForState(save);
+    ui.entityImg.src = img;
+    ui.entityVisual.style.transform = `scale(${save.hatched ? getGrowthScale(save) : 0.92})`;
+    ui.entityVisual.classList.toggle("crying", save.hatched && isSick(save));
+
+    if(!save.hatched){
+      ui.entityBubble.textContent = "どんな子かな？ ちょっと待ってね";
+      ui.sleepStatus.textContent = "ふ化まで3分";
+      ui.charStatus.textContent = `${getColorName(save)}のマカロンが静かに待っている`;
+      ui.growthNote.textContent = "マカロンの色の子が生まれます";
+      return;
+    }
+
+    const growthStage = getGrowthStage(save);
+    const growthLabel = ["まだ小さい", "少し育った", "だいぶ育った", "すっかり育った"][growthStage];
+    ui.growthNote.textContent = `${save.actionCount}回えらんだ / ${growthLabel}`;
+
+    if(isSick(save)){
+      ui.entityBubble.textContent = "ぽろぽろ";
+      ui.sleepStatus.textContent = "具合がよくなさそう";
+    }else if(isNightTime()){
+      ui.entityBubble.textContent = "すやすや";
+      ui.sleepStatus.textContent = "夜なので眠っている";
+    }else{
+      ui.entityBubble.textContent = save.name === "???" ? "こんにちは" : save.name;
+      ui.sleepStatus.textContent = "起きている";
+    }
+
+    const texts = [];
+    if(save.hunger > 7) texts.push("おなかがすいていそう");
+    if(save.tired > 7) texts.push("少しつかれていそう");
+    if(save.dirty > 6) texts.push("そろそろそうじしたいかも");
+    if(texts.length === 0) texts.push("いっしょにいる");
+    ui.charStatus.textContent = texts.join(" / ");
+  }
+
+  function updateStatusPill(save){
+    if(save.ended){
+      ui.statusText.textContent = "記録だけが残る";
+      return;
+    }
+    if(!save.hatched){
+      ui.statusText.textContent = "マカロンの時間";
+      return;
+    }
+    if(isSick(save)){
+      ui.statusText.textContent = "少しつらそう";
+      return;
+    }
+    if(isNightTime()){
+      ui.statusText.textContent = "夜の眠り";
+      return;
+    }
+    ui.statusText.textContent = "今日もいっしょ";
+  }
+
+  function updateHeartDisplay(save){
+    const pct = Math.max(0, Math.min(100, save.heart / 10 * 100));
+    ui.heartFill.style.width = pct + "%";
+    ui.heartVal.textContent = `${round1(save.heart)}/10`;
+    recordHeart(save);
+  }
+
+  function hatchIfNeeded(save, elapsed){
+    if(!save.hatched && elapsed >= HATCH_MS){
+      save.hatched = true;
+      pushLiveLog(save, `${getColorName(save)}の子が生まれた`);
+      addChoice(save, "Hatch", `${getColorName(save)} character born`);
+      showToast("マカロンが、その色の子になりました。");
+    }
+  }
+
+  function updateDayBoundary(save, elapsed){
+    const nextDay = Math.min(TOTAL_DAYS, Math.floor(elapsed / DAY_MS) + 1);
+    if(nextDay !== save.day){
+      save.day = nextDay;
+      pushLiveLog(save, `Day ${save.day} 開始`);
+    }
+  }
+
+  function maybeEnd(save, elapsed){
+    if(save.ended) return;
+    const finishedTime = elapsed >= DAY_MS * TOTAL_DAYS;
+    if(finishedTime){
+      save.ended = true;
+      save.endedAt = new Date().toISOString();
+      pushLiveLog(save, "ありがとう");
+      saveSave(save);
+      showEnding();
+    }
+  }
+
+  function showEnding(){ ui.endingScreen.classList.add("show"); }
+  function hideEnding(){ ui.endingScreen.classList.remove("show"); }
+
+  function simulateNeeds(save){
+    if(save.pausedSince || save.ended) return;
+
+    const nowMs = now();
+    const last = save.lastCheckedAt || nowMs;
+    const dt = Math.max(0, nowMs - last) / 1000;
+    if(!dt) return;
+
+    // 進行はゆっくり。3日で極端になりすぎないように調整
+    save.hunger = clamp(save.hunger + dt * 0.0009, 0, 10);
+    save.tired  = clamp(save.tired  + dt * 0.0007, 0, 10);
+    save.dirty  = clamp(save.dirty  + dt * 0.00055, 0, 10);
+    save.heart  = clamp(save.heart  - dt * 0.00022, 0, 10);
+
+    save.lastCheckedAt = nowMs;
+  }
+
+  function touchAction(save){
+    save.actionCount += 1;
+    save.lastCheckedAt = now();
+  }
+
+  function hiddenDelta(kind, index, side){
+    const seed = ((index + 1) * (side + 2) + kind.length) % 5;
+
+    if(kind === "food"){
+      const map = [
+        { heart: 0.6, hunger: -1.6, tired: 0.1 },
+        { heart: 0.4, hunger: -1.3, dirty: 0.06 },
+        { heart: 0.8, hunger: -1.4, tired: -0.08 },
+        { heart: 0.3, hunger: -1.8, dirty: 0.1 },
+        { heart: 0.5, hunger: -1.2, mood: 0.25 }
+      ];
+      return map[seed];
+    }
+
+    if(kind === "out"){
+      const map = [
+        { heart: 0.7, tired: 0.35, hunger: 0.25 },
+        { heart: 0.35, tired: -0.45, hunger: 0.06 },
+        { heart: 0.55, tired: 0.1, dirty: 0.25 },
+        { heart: 0.45, tired: -0.12, mood: 0.35 },
+        { heart: 0.5, hunger: 0.12, mood: 0.18 }
+      ];
+      return map[seed];
+    }
+
+    const map = [
+      { heart: 0.65, mood: 0.45 },
+      { heart: 0.4, mood: 0.22 },
+      { heart: 0.55, tired: -0.12 },
+      { heart: 0.3, dirty: -0.06 },
+      { heart: 0.48, mood: 0.28 }
+    ];
+    return map[seed];
+  }
+
+  function applyDelta(save, delta){
+    save.heart = clamp(save.heart + (delta.heart || 0), 0, 10);
+    save.hunger = clamp(save.hunger + (delta.hunger || 0), 0, 10);
+    save.tired = clamp(save.tired + (delta.tired || 0), 0, 10);
+    save.dirty = clamp(save.dirty + (delta.dirty || 0), 0, 10);
+    save.mood = clamp(save.mood + (delta.mood || 0), -10, 10);
+  }
+
+  function openChoiceModal(kind){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
+
+    let list = [];
+    let cursorKey = "food";
+    let title = "2択";
+    let desc = "どちらかを選ぶ";
+
+    if(kind === "food"){
+      list = FOOD_CHOICES;
+      cursorKey = "food";
+      title = "ごはん";
+      desc = "ごはんボタンを押すたびに、20この2択が順番に出ます。";
+    }else if(kind === "out"){
+      list = OUT_CHOICES;
+      cursorKey = "out";
+      title = "おでかけ";
+      desc = "その日の気分で選ぶ。";
+    }else if(kind === "style"){
+      list = STYLE_CHOICES;
+      cursorKey = "style";
+      title = "スタイル";
+      desc = "見た目や雰囲気の選択。";
+    }
+
+    const index = save.cursors[cursorKey] % list.length;
+    const pair = list[index];
+
+    currentChoiceContext = { kind, cursorKey, list, index, pair };
+    ui.choiceModalTitle.textContent = title;
+    ui.choiceModalDesc.textContent = desc;
+    ui.choiceProgress.textContent = `${index + 1} / ${list.length}`;
+    ui.choiceQuestion.textContent = `${pair[0]} にする？ それとも ${pair[1]}？`;
+    ui.choiceLeft.textContent = pair[0];
+    ui.choiceRight.textContent = pair[1];
+    ui.choiceHint.textContent = kind === "food" ? "選ぶと次回は次の2択が出ます。" : "選ぶと記録に残ります。";
+    ui.choiceModal.classList.add("show");
+  }
+
+  function closeChoiceModal(){
+    ui.choiceModal.classList.remove("show");
+    currentChoiceContext = null;
+  }
+
+  function selectCurrentChoice(side){
+    if(!currentChoiceContext) return;
+    const save = loadSave();
+    if(!save || save.ended) return;
+
+    const { kind, cursorKey, index, pair } = currentChoiceContext;
+    const selected = pair[side];
+
+    applyDelta(save, hiddenDelta(kind, index, side));
+    save.cursors[cursorKey] += 1;
+    touchAction(save);
+
+    const label = `${pair[0]} / ${pair[1]} → ${selected}`;
+    if(kind === "food"){
+      pushLiveLog(save, `ごはんで「${selected}」を選んだ`);
+      addChoice(save, "Food", label);
+      showToast(`今日は「${selected}」にしました。`);
+    }else if(kind === "out"){
+      pushLiveLog(save, `おでかけで「${selected}」を選んだ`);
+      addChoice(save, "Out", label);
+      showToast(`「${selected}」を選びました。`);
+    }else if(kind === "style"){
+      pushLiveLog(save, `スタイルで「${selected}」を選んだ`);
+      addChoice(save, "Style", label);
+      showToast(`「${selected}」にしてみました。`);
+    }
+
+    saveSave(save);
+    closeChoiceModal();
+    render();
+  }
+
+  function actDrink(){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
+    save.heart = clamp(save.heart + 0.9, 0, 10);
+    save.tired = clamp(save.tired - 0.9, 0, 10);
+    pushLiveLog(save, "ドリンクをあげた");
+    addChoice(save, "Drink", "Drink");
+    touchAction(save);
+    saveSave(save);
+    showToast("少し元気になったみたいです。");
+    render();
+  }
+
+  function actMacaron(){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
+    save.heart = clamp(save.heart + 1.1, 0, 10);
+    save.hunger = clamp(save.hunger - 0.6, 0, 10);
+    pushLiveLog(save, "マカロンをあげた");
+    addChoice(save, "Macaron", "Give");
+    touchAction(save);
+    saveSave(save);
+    showToast("甘い時間が過ぎました。");
+    render();
+  }
+
+  function startPoopGame(){
+    const save = loadSave();
+    if(!save || save.ended || !save.hatched) return;
+    ui.poopGame.classList.add("show");
+    poopGameState = { count: 0, target: POOP_COUNT_TARGET };
+    ui.poopGameArea.innerHTML = "";
+    updatePoopScore();
+    spawnPoops();
+  }
+
+  function spawnPoops(){
+    const area = ui.poopGameArea;
+    const w = area.clientWidth;
+    const h = area.clientHeight;
+    for(let i = 0; i < 3; i++){
+      setTimeout(() => {
+        if(!ui.poopGame.classList.contains("show") || poopGameState.count >= poopGameState.target) return;
+        const poop = document.createElement("div");
+        poop.className = "poop";
+        poop.textContent = "💩";
+        poop.style.left = Math.random() * (w - 42) + "px";
+        poop.style.top = Math.random() * (h - 42) + "px";
+        poop.addEventListener("click", () => {
+          poopGameState.count += 1;
+          updatePoopScore();
+          poop.remove();
+          if(poopGameState.count >= poopGameState.target){
+            setTimeout(endPoopGame, 250);
+          }else{
+            setTimeout(spawnPoops, 260);
+          }
+        }, { once: true });
+        area.appendChild(poop);
+      }, i * 260);
+    }
+  }
+
+  function updatePoopScore(){
+    ui.poopScore.textContent = `${poopGameState.count} / ${poopGameState.target}`;
+  }
+
+  function endPoopGame(){
+    if(!ui.poopGame.classList.contains("show")) return;
+    ui.poopGame.classList.remove("show");
+    ui.poopGameArea.innerHTML = "";
+
+    const save = loadSave();
+    if(!save || save.ended) return;
+    if(poopGameState.count > 0){
+      save.dirty = clamp(save.dirty - 2.2, 0, 10);
+      save.heart = clamp(save.heart + 0.6, 0, 10);
+      touchAction(save);
+      pushLiveLog(save, "そうじをした");
+      addChoice(save, "Clean", `Complete (${poopGameState.count})`);
+      saveSave(save);
+      showToast("きれいになりました。");
+      render();
+    }
+  }
+
+  function openLetter(){
+    ui.letterContent.textContent =
+`見つけてくれたあなたへ
+
+この子は、マカロンの姿でやってきました。
+3分たつと、その色の子として生まれます。
+
+ごはんを選ぶこと。
+少しおでかけすること。
+きれいにしてあげること。
+夜には、そっと眠らせてあげること。
+
+正しい育て方はありません。
+あるのは、あなたが選んだことと、残る記録だけです。
+
+どうか、3日間よろしくね。`;
+    ui.letterModal.classList.add("show");
+  }
+
+  function closeLetter(){ ui.letterModal.classList.remove("show"); }
+
+  function openLogs(){
+    const save = loadSave();
+    if(!save) return;
+    const groups = buildDayLogs(save);
+    ui.logsContent.innerHTML = groups.map(group => `
+      <div class="logDay">
+        <h3>Day ${group.day}</h3>
+        <ul>${group.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    `).join("");
+    ui.logsModal.classList.add("show");
+  }
+
+  function closeLogs(){ ui.logsModal.classList.remove("show"); }
+
+  function buildDayLogs(save){
+    const result = [];
+    for(let day = 1; day <= TOTAL_DAYS; day++){
+      const items = [];
+      const dayEvents = (save.events || []).filter(e => e.day === day).map(e => e.text);
+      const food = save.choices[`day${day}_Food`] || [];
+      const out = save.choices[`day${day}_Out`] || [];
+      const style = save.choices[`day${day}_Style`] || [];
+      const clean = save.choices[`day${day}_Clean`] || [];
+      const drink = save.choices[`day${day}_Drink`] || [];
+      const macaron = save.choices[`day${day}_Macaron`] || [];
+      items.push(`ハートの最後: ${round1(getDayHeart(save, day))}`);
+      if(food.length) items.push(`ごはん: ${food.join(" / ")}`);
+      if(out.length) items.push(`おでかけ: ${out.join(" / ")}`);
+      if(style.length) items.push(`スタイル: ${style.join(" / ")}`);
+      if(clean.length) items.push(`そうじ: ${clean.join(" / ")}`);
+      if(drink.length) items.push(`ドリンク: ${drink.length}回`);
+      if(macaron.length) items.push(`マカロン: ${macaron.length}回`);
+      if(dayEvents.length) items.push(...dayEvents);
+      if(!items.length) items.push("まだ記録がありません。");
+      result.push({ day, items });
+    }
+    return result;
+  }
+
+  function getDayHeart(save, day){
+    const upper = day * DAY_MS;
+    const candidates = (save.heartHistory || []).filter(h => h.t <= upper);
+    return candidates.length ? candidates[candidates.length - 1].v : save.heart;
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  function toggleSitter(){
+    const save = loadSave();
+    if(!save || save.ended) return;
+
+    if(!save.pausedSince){
+      save.pausedSince = now();
+      pushLiveLog(save, "シッター開始");
+      showToast("シッターが見てくれます。");
+    }else{
+      const paused = now() - save.pausedSince;
+      save.pauseAccumMs += paused;
+      save.sitterUsedMs += paused;
+      save.pausedSince = null;
+      pushLiveLog(save, `シッター終了 (${Math.round(paused / 1000)}秒)`);
+      showToast("また時間が動きはじめます。");
+      save.lastCheckedAt = now();
+    }
+
+    saveSave(save);
+    render();
+  }
+
+  function changeName(){
+    const save = loadSave();
+    if(!save || save.ended) return;
+    const newName = prompt("名前を入力してください:", save.name === "???" ? "" : save.name);
+    if(!newName || !newName.trim()) return;
+    save.name = newName.trim();
+    pushLiveLog(save, `名前が「${save.name}」に決まった`);
+    saveSave(save);
+    showToast(`「${save.name}」になりました。`);
+    render();
+  }
+
+  function resetGame(){
+    if(!confirm("本当にリセットしますか？")) return;
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  }
+
+  function render(){
+    let save = loadSave();
+    if(!save) return;
+
+    const elapsed = calcElapsedMs(save);
+    simulateNeeds(save);
+    hatchIfNeeded(save, elapsed);
+    updateDayBoundary(save, elapsed);
+    maybeEnd(save, elapsed);
+
+    ui.dayNum.textContent = save.day;
+    ui.sitterToggle.dataset.on = save.pausedSince ? "true" : "false";
+    updateHeartDisplay(save);
+    updateStatusPill(save);
+    updateEntityDisplay(save);
+
+    disableActions(save.ended || !save.hatched);
+    saveSave(save);
+  }
+
+  function disableActions(disabled){
+    [ui.btnFood, ui.btnOut, ui.btnStyle, ui.btnClean, ui.btnDrink, ui.btnMacaron].forEach(btn => {
+      btn.disabled = disabled;
+    });
+  }
+
+  // ===== イベント =====
+  ui.btnGoSurvey.addEventListener("click", openSurveyPage);
+  ui.btnFood.addEventListener("click", () => openChoiceModal("food"));
+  ui.btnOut.addEventListener("click", () => openChoiceModal("out"));
+  ui.btnStyle.addEventListener("click", () => openChoiceModal("style"));
+  ui.btnDrink.addEventListener("click", actDrink);
+  ui.btnMacaron.addEventListener("click", actMacaron);
+  ui.btnClean.addEventListener("click", startPoopGame);
+  ui.sitterToggle.addEventListener("click", toggleSitter);
+  ui.btnName.addEventListener("click", changeName);
+  ui.btnReset.addEventListener("click", resetGame);
+
+  ui.choiceLeft.addEventListener("click", () => selectCurrentChoice(0));
+  ui.choiceRight.addEventListener("click", () => selectCurrentChoice(1));
+  ui.btnChoiceClose.addEventListener("click", closeChoiceModal);
+
+  ui.btnLetter.addEventListener("click", openLetter);
+  ui.btnLetterClose.addEventListener("click", closeLetter);
+
+  ui.btnLogs.addEventListener("click", openLogs);
+  ui.btnLogsClose.addEventListener("click", closeLogs);
+  ui.btnEndingLogs.addEventListener("click", () => { hideEnding(); openLogs(); });
+  ui.btnEndingClose.addEventListener("click", hideEnding);
+  ui.btnPoopExit.addEventListener("click", endPoopGame);
+
+  [ui.choiceModal, ui.letterModal, ui.logsModal].forEach(modal => {
+    modal.addEventListener("click", (e) => {
+      if(e.target !== modal) return;
+      if(modal === ui.choiceModal) closeChoiceModal();
+      if(modal === ui.letterModal) closeLetter();
+      if(modal === ui.logsModal) closeLogs();
+    });
+  });
+
+  // ===== 初期化 =====
+  handleSurveyReturn();
+
+  let save = loadSave();
+  if(!save){
+    save = createNewSave();
+    pushLiveLog(save, "ゲーム開始");
+    saveSave(save);
+  }
+
+  ui.surveyGate.classList.toggle("show", !isSurveyDone());
+  render();
+  setInterval(render, 1000);
+})();
+</script>
+</body>
+</html>
