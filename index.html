@@ -1417,44 +1417,47 @@
     }
 
     function updateEntityDisplay(save) {
-      setEntityImage(getImageCandidates(save));
-      ui.entityVisual.style.transform = `scale(${save.hatched ? getGrowthScale(save) : 0.92})`;
-      ui.entityVisual.classList.toggle("crying", save.hatched && isSick(save) && !isNightTime());
+  setEntityImage(getImageCandidates(save));
+  ui.entityVisual.style.transform = `scale(${save.hatched ? getGrowthScale(save) : 0.92})`;
+  ui.entityVisual.classList.toggle("crying", save.hatched && isSick(save) && !isNightTime());
 
-      if (!save.hatched) {
-        const remainSec = Math.max(0, Math.ceil((HATCH_MS - calcElapsedMs(save)) / 1000));
-        ui.entityBubble.textContent = "どんな子かな？ ちょっと待ってね";
-        ui.sleepStatus.textContent = `ふ化まで ${remainSec}s`;
-        ui.growthNote.textContent = "マカロンは1分後に生まれます";
-        ui.charStatus.textContent = "マカロンが静かに待っている";
-        ui.smallNote.textContent = "携帯でも大きくなりすぎない文字サイズにしています";
-        return;
-      }
+  if (!save.hatched) {
+    const remainSec = Math.max(0, Math.ceil((HATCH_MS - calcElapsedMs(save)) / 1000));
+    ui.entityBubble.style.display = "block";
+    ui.entityBubble.textContent = "どんな子かな？ ちょっと待ってね";
+    ui.sleepStatus.textContent = `ふ化まで ${remainSec}s`;
+    ui.growthNote.textContent = "マカロンは1分後に生まれます";
+    ui.charStatus.textContent = "マカロンが静かに待っている";
+    ui.smallNote.textContent = "携帯でも大きくなりすぎない文字サイズにしています";
+    return;
+  }
 
-      const growthNames = ["まだ小さい","少し育った","だいぶ育った","すっかり育った"];
-      const growthLabel = growthNames[getGrowthStage(save)];
-      ui.growthNote.textContent = `${save.actionCount}回えらんだ / ${growthLabel}`;
-      ui.smallNote.textContent = "状態は表情や動きで変わります";
+  const growthNames = ["まだ小さい","少し育った","だいぶ育った","すっかり育った"];
+  const growthLabel = growthNames[getGrowthStage(save)];
+  ui.growthNote.textContent = `${save.actionCount}回えらんだ / ${growthLabel}`;
+  ui.smallNote.textContent = "状態は表情や動きで変わります";
 
-      if (isNightTime()) {
-        ui.entityBubble.textContent = "すやすや";
-        ui.sleepStatus.textContent = "夜なので眠っている";
-      } else if (isSick(save)) {
-        ui.entityBubble.textContent = "ぽろぽろ";
-        ui.sleepStatus.textContent = "具合がよくなさそう";
-      } else {
-        ui.entityBubble.textContent = save.name === "???" ? "こんにちは" : save.name;
-        ui.sleepStatus.textContent = "起きている";
-      }
+  if (isNightTime()) {
+    ui.entityBubble.style.display = "block";
+    ui.entityBubble.textContent = "すやすや";
+    ui.sleepStatus.textContent = "夜なので眠っている";
+  } else if (isSick(save)) {
+    ui.entityBubble.style.display = "block";
+    ui.entityBubble.textContent = "ぽろぽろ";
+    ui.sleepStatus.textContent = "具合がよくなさそう";
+  } else {
+    ui.entityBubble.style.display = "none";
+    ui.entityBubble.textContent = "";
+    ui.sleepStatus.textContent = "起きている";
+  }
 
-      const statusLines = [];
-      if (save.hunger > 7) statusLines.push("おなかがすいていそう");
-      if (save.tired > 7) statusLines.push("少しつかれていそう");
-      if (save.dirty > 6) statusLines.push("そろそろそうじしたいかも");
-      if (!statusLines.length) statusLines.push("いっしょにいる");
-      ui.charStatus.textContent = statusLines.join(" / ");
-    }
-
+  const statusLines = [];
+  if (save.hunger > 7) statusLines.push("おなかがすいていそう");
+  if (save.tired > 7) statusLines.push("少しつかれていそう");
+  if (save.dirty > 6) statusLines.push("そろそろそうじしたいかも");
+  if (!statusLines.length) statusLines.push("いっしょにいる");
+  ui.charStatus.textContent = statusLines.join(" / ");
+}
     function maybeDeliverLetter(save, elapsed) {
       if (!save.letterArrived && elapsed >= LETTER_ARRIVE_MS) {
         save.letterArrived = true;
