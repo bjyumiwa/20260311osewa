@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Research Consent / 研究同意</title>
+  <style>
+    :root{
+      --bg0:#050816;
+      --bg1:#0b1028;
+      --text:#eef2ff;
+      --muted:rgba(238,242,255,.72);
+      --line:rgba(255,255,255,.14);
+      --card:rgba(255,255,255,.06);
+      --shadow:0 14px 40px rgba(0,0,0,.35);
+      --radius:18px;
+      --accent1:#c4b5fd;
+      --accent2:#93c5fd;
+      --ok:#b9f6ca;
+      --warn:#ffd6a5;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+      background:
+        linear-gradient(180deg, rgba(5,8,22,.55), rgba(11,16,40,.78)),
+        url("./space_background.png") center/cover no-repeat fixed,
+        linear-gradient(180deg, rgba(5,8,22,.95), rgba(11,16,40,.98));
+      min-height:100vh;
+    }
+    .wrap{max-width:900px;margin:0 auto;padding:18px 14px 40px}
+    .topbar{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05);
+      border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:10px;z-index:20;
+      backdrop-filter:blur(10px)
+    }
+    .brand{display:flex;gap:10px;align-items:center}
+    .brand .dot{
+      width:12px;height:12px;border-radius:999px;
+      background:linear-gradient(180deg,var(--accent1),var(--accent2));
+      box-shadow:0 0 18px rgba(196,181,253,.35)
+    }
+    .brand .title{font-weight:800;font-size:14px}
+    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .langSel{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .card{
+      margin-top:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    h1{margin:0 0 10px;font-size:30px;line-height:1.25}
+    h2{margin:0 0 10px;font-size:18px}
+    p, li, small{color:var(--muted);line-height:1.8}
+    ul{margin:10px 0 0 1.2em;padding:0}
+    .checkLine{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      margin-top:12px;
+    }
+    .checkLine input{
+      margin-top:4px;
+      transform:scale(1.2);
+    }
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      font-size:13px;
+      word-break:break-all;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:12px;
+      padding:12px 14px;
+      line-height:1.7;
+      color:var(--text);
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    button{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 12px 26px rgba(0,0,0,.22);
+      transition:transform .08s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+    }
+    button:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.09);
+      border-color:rgba(255,255,255,.22);
+    }
+    button:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+    .primary{
+      background:linear-gradient(135deg, rgba(196,181,253,.22), rgba(147,197,253,.22));
+      border-color:rgba(196,181,253,.34);
+    }
+    .ok{color:var(--ok);font-weight:800}
+    .warn{color:var(--warn);font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div class="title" id="brandTitle">研究同意と事前アンケート</div>
+          <div class="sub" id="brandSub">Googleフォームへ進みます</div>
+        </div>
+      </div>
+      <select id="langSel" class="langSel">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h1 id="heroTitle">研究同意と事前アンケート</h1>
+      <p id="heroDesc">このページでは研究について読んでいただき、同意のうえで Googleフォームの事前アンケートへ進みます。</p>
+    </div>
+
+    <div class="card">
+      <h2 id="consentTitle">研究について</h2>
+      <ul id="consentList"></ul>
+      <div class="checkLine">
+        <input type="checkbox" id="agreeCheck">
+        <label for="agreeCheck" id="agreeLabel">上記を読み、研究参加に同意して、事前アンケートへ進みます。</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 id="pidTitle">参加者ID</h2>
+      <p id="pidDesc">匿名のIDです。Googleフォームに自動入力されます。</p>
+      <div class="mono" id="pidBox"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="adminTitle">Googleフォーム側の設定</h2>
+      <p id="adminDesc">フォームの確認メッセージには、次のURLを設定してください。</p>
+      <div class="mono" id="gameUrlBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <button class="primary" id="btnGoForm" disabled>同意してアンケートへ進む</button>
+        <span id="status" class="warn">未同意</span>
+      </div>
+      <small id="goFormHint" style="margin-top:10px;display:block;">Googleフォーム送信後は、フォームの送信完了画面にあるリンクからゲームへ戻ります。</small>
+    </div>
+
+    <div class="card">
+      <h2 id="devTitle">開発用</h2>
+      <div class="row">
+        <button id="btnReset">同意状態をリセット</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const FORM_URL_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSdKcqLBRLcGALdwYhWQFD1tuZtbqXyLpTBxfZZ9Or2pug16Rg/viewform";
+    const ENTRY_PID      = "entry.1425663825";
+    const GIFT_SURVEY_PID_KEY  = "gift_pid";
+    const OSEWA_SURVEY_PID_KEY = "osewa_pid_v1";
+    const CONSENT_KEY    = "osewa_consent_v1";
+    const CONSENT_AT_KEY = "osewa_consent_at_v1";
+    const LANG_KEY       = "osewa_lang_v1";
+
+    const TXT = {
+      ja: {
+        brandTitle:  "研究同意と事前アンケート",
+        brandSub:    "Googleフォームへ進みます",
+        heroTitle:   "研究同意と事前アンケート",
+        heroDesc:    "このページでは研究について読んでいただき、同意のうえで Googleフォームの事前アンケートへ進みます。",
+        consentTitle:"研究について",
+        consentList: [
+          "この研究は、デジタルキャラクターへの愛着や同一性に関する感じ方を調べることを目的としています。",
+          "参加は自由です。参加しないことで不利益はありません。",
+          "回答は研究目的で利用されます。",
+          "氏名や住所など、個人が特定される情報は入力しないでください。",
+          "ゲーム内の選択やログが記録される場合があります。",
+          "研究への同意後でも、途中でやめることができます。"
+        ],
+        agreeLabel:  "上記を読み、研究参加に同意して、事前アンケートへ進みます。",
+        pidTitle:    "参加者ID",
+        pidDesc:     "匿名のIDです。Googleフォームに自動入力されます。",
+        adminTitle:  "Googleフォーム側の設定",
+        adminDesc:   "フォームの確認メッセージには、次のURLを設定してください。",
+        btnGoForm:   "同意してアンケートへ進む",
+        statusOn:    "同意済み",
+        statusOff:   "未同意",
+        goFormHint:  "Googleフォーム送信後は、フォームの送信完了画面にあるリンクからゲームへ戻ります。",
+        devTitle:    "開発用",
+        btnReset:    "同意状態をリセット"
+      },
+      en: {
+        brandTitle:  "Consent and Pre-Survey",
+        brandSub:    "Open Google Form",
+        heroTitle:   "Consent and Pre-Survey",
+        heroDesc:    "Please read the research information below and proceed to the Google Form after agreeing.",
+        consentTitle:"About this research",
+        consentList: [
+          "This study explores feelings of attachment and identity toward a digital character.",
+          "Participation is voluntary. There is no disadvantage if you do not participate.",
+          "Responses will be used for research purposes.",
+          "Please do not enter personally identifiable information such as your name or address.",
+          "Choices and logs in the game may be recorded.",
+          "You may stop participating at any time, even after agreeing."
+        ],
+        agreeLabel:  "I have read the information above and agree to participate before proceeding to the survey.",
+        pidTitle:    "Participant ID",
+        pidDesc:     "This is an anonymous ID and will be passed to the Google Form automatically.",
+        adminTitle:  "Google Form setting",
+        adminDesc:   "Set the following URL in the confirmation message of the form.",
+        btnGoForm:   "Agree and open the survey",
+        statusOn:    "Agreed",
+        statusOff:   "Not agreed",
+        goFormHint:  "After submitting the Google Form, return to the game from the link shown on the completion page.",
+        devTitle:    "Developer",
+        btnReset:    "Reset consent state"
+      },
+      zh: {
+        brandTitle:  "研究同意与问卷",
+        brandSub:    "前往 Google 表单",
+        heroTitle:   "研究同意与问卷",
+        heroDesc:    "请先阅读研究说明，并在同意后进入 Google 表单填写问卷。",
+        consentTitle:"关于本研究",
+        consentList: [
+          "本研究旨在了解人们对数字角色的依恋感与同一性判断。",
+          "参加完全自愿，不参加不会带来任何不利影响。",
+          "问卷回答仅用于研究目的。",
+          "请不要填写姓名、地址等可识别个人身份的信息。",
+          "游戏中的选择与日志可能会被记录。",
+          "即使已同意参加，也可以在任何时候中止。"
+        ],
+        agreeLabel:  "我已阅读以上内容，并同意参加研究后再进入问卷。",
+        pidTitle:    "参与者 ID",
+        pidDesc:     "这是匿名 ID，会自动传入 Google 表单。",
+        adminTitle:  "Google 表单设置",
+        adminDesc:   "请在表单提交后的确认信息中设置下面这个网址。",
+        btnGoForm:   "同意并进入问卷",
+        statusOn:    "已同意",
+        statusOff:   "未同意",
+        goFormHint:  "提交 Google 表单后，请从完成页面中的链接返回游戏。",
+        devTitle:    "开发用",
+        btnReset:    "重置同意状态"
+      }
+    };
+
+    const ui = {
+      langSel:     document.getElementById("langSel"),
+      brandTitle:  document.getElementById("brandTitle"),
+      brandSub:    document.getElementById("brandSub"),
+      heroTitle:   document.getElementById("heroTitle"),
+      heroDesc:    document.getElementById("heroDesc"),
+      consentTitle:document.getElementById("consentTitle"),
+      consentList: document.getElementById("consentList"),
+      agreeCheck:  document.getElementById("agreeCheck"),
+      agreeLabel:  document.getElementById("agreeLabel"),
+      pidTitle:    document.getElementById("pidTitle"),
+      pidDesc:     document.getElementById("pidDesc"),
+      pidBox:      document.getElementById("pidBox"),
+      adminTitle:  document.getElementById("adminTitle"),
+      adminDesc:   document.getElementById("adminDesc"),
+      gameUrlBox:  document.getElementById("gameUrlBox"),
+      btnGoForm:   document.getElementById("btnGoForm"),
+      status:      document.getElementById("status"),
+      goFormHint:  document.getElementById("goFormHint"),
+      devTitle:    document.getElementById("devTitle"),
+      btnReset:    document.getElementById("btnReset")
+    };
+
+    function getLang() { return localStorage.getItem(LANG_KEY) || "ja"; }
+    function setLang(lang) { localStorage.setItem(LANG_KEY, lang); }
+
+    function uid() {
+      try {
+        const a = new Uint32Array(4);
+        crypto.getRandomValues(a);
+        return [...a].map(x => x.toString(16).padStart(8, "0")).join("");
+      } catch(_) {
+        return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+      }
+    }
+
+    function getOrCreatePid() {
+      let v = localStorage.getItem(GIFT_SURVEY_PID_KEY) || localStorage.getItem(OSEWA_SURVEY_PID_KEY);
+      if (!v) { v = "p_" + uid(); }
+      localStorage.setItem(GIFT_SURVEY_PID_KEY, v);
+      localStorage.setItem(OSEWA_SURVEY_PID_KEY, v);
+      return v;
+    }
+
+    function buildFormUrl(pid) {
+      const u = new URL(FORM_URL_BASE);
+      u.searchParams.set("usp", "pp_url");
+      u.searchParams.set(ENTRY_PID, pid);
+      return u.toString();
+    }
+
+    function buildGameReturnUrl() {
+      const u = new URL("./index.html", location.href);
+      u.searchParams.set("survey", "done");
+      return u.toString();
+    }
+
+    function setConsent() {
+      const iso = new Date().toISOString();
+      localStorage.setItem(CONSENT_KEY, "1");
+      localStorage.setItem(CONSENT_AT_KEY, iso);
+    }
+
+    function updateConsentUI() {
+      const lang = getLang();
+      const t    = TXT[lang];
+      const agreed = ui.agreeCheck.checked;
+      ui.btnGoForm.disabled  = !agreed;
+      ui.status.textContent  = agreed ? t.statusOn : t.statusOff;
+      ui.status.className    = agreed ? "ok" : "warn";
+    }
+
+    function applyLanguage() {
+      const lang = getLang();
+      const t    = TXT[lang];
+      ui.langSel.value            = lang;
+      ui.brandTitle.textContent   = t.brandTitle;
+      ui.brandSub.textContent     = t.brandSub;
+      ui.heroTitle.textContent    = t.heroTitle;
+      ui.heroDesc.textContent     = t.heroDesc;
+      ui.consentTitle.textContent = t.consentTitle;
+      ui.consentList.innerHTML    = t.consentList.map(item => `<li>${item}</li>`).join("");
+      ui.agreeLabel.textContent   = t.agreeLabel;
+      ui.pidTitle.textContent     = t.pidTitle;
+      ui.pidDesc.textContent      = t.pidDesc;
+      ui.adminTitle.textContent   = t.adminTitle;
+      ui.adminDesc.textContent    = t.adminDesc;
+      ui.btnGoForm.textContent    = t.btnGoForm;
+      ui.goFormHint.textContent   = t.goFormHint;
+      ui.devTitle.textContent     = t.devTitle;
+      ui.btnReset.textContent     = t.btnReset;
+      updateConsentUI();
+    }
+
+    const pid = getOrCreatePid();
+    ui.pidBox.textContent     = pid;
+    ui.gameUrlBox.textContent = buildGameReturnUrl();
+    ui.langSel.value          = getLang();
+    applyLanguage();
+
+    ui.langSel.addEventListener("change", () => { setLang(ui.langSel.value); applyLanguage(); });
+    ui.agreeCheck.addEventListener("change", updateConsentUI);
+
+    ui.btnGoForm.addEventListener("click", () => {
+      if (!ui.agreeCheck.checked) return;
+      setConsent();
+      location.href = buildFormUrl(pid);
+    });
+
+    ui.btnReset.addEventListener("click", () => {
+      localStorage.removeItem(CONSENT_KEY);
+      localStorage.removeItem(CONSENT_AT_KEY);
+      ui.agreeCheck.checked = false;
+      updateConsentUI();
+    });
+  })();
+  </script>
+</body>
+</html>
