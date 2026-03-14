@@ -74,10 +74,9 @@
       animation:fadeInUp 0.8s ease forwards;
     }
 
-    section:nth-of-type(1){ animation-delay:0.2s; }
-    section:nth-of-type(2){ animation-delay:0.45s; }
-    section:nth-of-type(3){ animation-delay:0.7s; }
-    section:nth-of-type(4){ animation-delay:0.95s; }
+    section:nth-of-type(1){
+      animation-delay:0.2s;
+    }
 
     h2{
       margin:0 0 0.8rem;
@@ -88,32 +87,6 @@
     p{
       line-height:1.9;
       margin:0;
-    }
-
-    ul{
-      margin:0;
-      padding-left:1.2rem;
-      line-height:1.9;
-    }
-
-    li{
-      margin-bottom:0.45rem;
-    }
-
-    .flow{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
-      gap:0.8rem;
-      margin-top:1rem;
-    }
-
-    .flowItem{
-      padding:1rem 0.8rem;
-      border-radius:999px;
-      text-align:center;
-      font-weight:bold;
-      background:linear-gradient(135deg, #fce4ec, #e1f5fe);
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);
     }
 
     .buttonArea{
@@ -131,26 +104,12 @@
       font-weight:bold;
       border-radius:999px;
       box-shadow:0 8px 18px rgba(79,195,247,0.28);
-      transition:transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      transition:transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     a.button:hover{
       transform:translateY(-2px);
       box-shadow:0 10px 22px rgba(79,195,247,0.34);
-    }
-
-    .sub{
-      margin-top:0.9rem;
-      font-size:0.95rem;
-      color:#666;
-      text-align:center;
-      line-height:1.8;
-    }
-
-    .tiny{
-      font-size:0.9rem;
-      color:#666;
-      margin-top:0.8rem;
     }
 
     footer{
@@ -160,33 +119,6 @@
       color:#666;
       margin-top:auto;
       background:rgba(255,255,255,0.42);
-    }
-
-    .hidden{
-      display:none;
-    }
-
-    .debugBox{
-      margin-top:1rem;
-      padding:1rem;
-      border-radius:1rem;
-      background:rgba(255,255,255,0.75);
-      border:1px dashed rgba(0,0,0,0.12);
-      line-height:1.8;
-    }
-
-    .smallBtn{
-      display:inline-block;
-      margin-top:0.6rem;
-      margin-right:0.5rem;
-      padding:0.75rem 1.2rem;
-      border:none;
-      border-radius:999px;
-      background:#fff;
-      color:#444;
-      cursor:pointer;
-      box-shadow:0 2px 8px rgba(0,0,0,0.06);
-      font-weight:bold;
     }
 
     @media (max-width:640px){
@@ -210,38 +142,6 @@
 
   <main>
     <section>
-      <h2>どんな体験ですか？</h2>
-      <p>
-        最初はまだ生まれていない存在が、時間の経過であらわれます。<br>
-        ごはん、おでかけ、小さな選択、そして見守る時間。<br>
-        3日間のあいだに、あなたとその存在のあいだに何が残るのかをたどる体験です。
-      </p>
-    </section>
-
-    <section>
-      <h2>この体験について</h2>
-      <ul>
-        <li>体験の前後に、短いアンケートがあります</li>
-        <li>ゲームはブラウザでそのまま動きます</li>
-        <li>記録は、この端末のブラウザに保存されます</li>
-        <li>ゲーム内容に正解や評価はありません</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>流れ</h2>
-      <div class="flow">
-        <div class="flowItem">表紙</div>
-        <div class="flowItem">開始前アンケート</div>
-        <div class="flowItem">ゲーム</div>
-        <div class="flowItem">終了後アンケート</div>
-      </div>
-      <p class="tiny">
-        開始前アンケートに回答すると、フォーム送信後の画面からゲームへ進めます。
-      </p>
-    </section>
-
-    <section>
       <h2>はじめる</h2>
       <p>
         下のボタンから開始前アンケートへ進んでください。<br>
@@ -249,22 +149,14 @@
       </p>
 
       <div class="buttonArea">
-        <a id="startButton" class="button" href="START_FORM_URL" target="_blank" rel="noopener noreferrer">
+        <a
+          class="button"
+          href="https://docs.google.com/forms/d/e/1FAIpQLSdKcqLBRLcGALdwYhWQFD1tuZtbqXyLpTBxfZZ9Or2pug16Rg/viewform?usp=header"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           アンケートに回答してはじめる
         </a>
-      </div>
-
-      <div class="sub">
-        Googleフォーム送信後の完了画面に、ゲーム開始URLを載せておくとスムーズです。<br>
-        ゲームURLは <span id="gameUrlText"></span> です。
-      </div>
-
-      <div class="debugBox">
-        開始前フォームURLと終了後フォームURLは、このHTMLの下の設定で差し替えできます。<br>
-        ゲーム本体は今のHTMLを <strong>game.html</strong> という名前で置いてください。
-        <br>
-        <button class="smallBtn" type="button" onclick="copyGameUrl()">ゲームURLをコピー</button>
-        <button class="smallBtn" type="button" onclick="copyEndGuide()">終了後案内文をコピー</button>
       </div>
     </section>
   </main>
@@ -272,32 +164,5 @@
   <footer>
     © 2026 お世話ゲームプロジェクト
   </footer>
-
-  <script>
-    const CONFIG = {
-      startFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdKcqLBRLcGALdwYhWQFD1tuZtbqXyLpTBxfZZ9Or2pug16Rg/viewform?usp=header",
-      endFormUrl: "END_FORM_URL"
-    };
-
-    const gameUrl = new URL("game.html", location.href).href;
-
-    document.getElementById("startButton").href = CONFIG.startFormUrl;
-    document.getElementById("gameUrlText").textContent = gameUrl;
-
-    function copyGameUrl(){
-      navigator.clipboard.writeText(gameUrl)
-        .then(() => alert("ゲームURLをコピーしました"))
-        .catch(() => alert("コピーできませんでした"));
-    }
-
-    function copyEndGuide(){
-      const text =
-`ゲーム終了後アンケートはこちらです。
-${CONFIG.endFormUrl}`;
-      navigator.clipboard.writeText(text)
-        .then(() => alert("終了後案内文をコピーしました"))
-        .catch(() => alert("コピーできませんでした"));
-    }
-  </script>
 </body>
 </html>
