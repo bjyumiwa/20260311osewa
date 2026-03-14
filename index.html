@@ -6,223 +6,843 @@
   <title>3日間のお世話ゲーム</title>
   <style>
     :root{
+      --bg-image:none;
       --bg0:#050816;
       --bg1:#0b1028;
-      --card:rgba(255,255,255,.08);
+      --panel:rgba(255,255,255,.07);
+      --panel-strong:rgba(255,255,255,.10);
       --text:#eef2ff;
-      --muted:rgba(238,242,255,.72);
+      --muted:rgba(238,242,255,.78);
       --line:rgba(255,255,255,.14);
-      --shadow:0 14px 40px rgba(0,0,0,.35);
-      --radius:18px;
+      --shadow:0 16px 40px rgba(0,0,0,.35);
+      --radius:20px;
       --accent1:#c4b5fd;
       --accent2:#93c5fd;
       --success:#b9f6ca;
       --warn:#ffd6a5;
       --danger:#fda4af;
     }
+
     *{box-sizing:border-box}
-    body{
+
+    html,body{
       margin:0;
+      min-height:100%;
+    }
+
+    body{
       color:var(--text);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
       background:
         linear-gradient(180deg, rgba(5,8,22,.55), rgba(11,16,40,.78)),
-        url("./space_background.png") center/cover no-repeat fixed,
+        var(--bg-image) center/cover no-repeat fixed,
         linear-gradient(180deg, rgba(5,8,22,.95), rgba(11,16,40,.98));
-      min-height:100vh;
       overflow-x:hidden;
     }
-    .wrap{max-width:1120px;margin:0 auto;padding:18px 14px 40px}
+
+    .wrap{
+      max-width:1160px;
+      margin:0 auto;
+      padding:18px 14px 44px;
+    }
+
     .topbar{
-      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
-      padding:10px 12px;border:1px solid var(--line);background:rgba(255,255,255,.05);
-      border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:10px;z-index:20;
-      backdrop-filter:blur(10px)
+      position:sticky;
+      top:10px;
+      z-index:20;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.06);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
     }
-    .brand{display:flex;gap:10px;align-items:center}
-    .brand .dot{
-      width:12px;height:12px;border-radius:999px;
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:220px;
+    }
+
+    .brandDot{
+      width:14px;
+      height:14px;
+      border-radius:999px;
       background:linear-gradient(180deg,var(--accent1),var(--accent2));
-      box-shadow:0 0 18px rgba(196,181,253,.35)
+      box-shadow:0 0 18px rgba(196,181,253,.45);
+      flex:0 0 auto;
     }
-    .brand .title{font-weight:800;font-size:14px}
-    .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
-    .statusRow{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex:1;flex-wrap:wrap}
-    .pill,.statusPill{
-      display:flex;align-items:center;gap:8px;min-height:34px;padding:8px 10px;border-radius:999px;
-      border:1px solid var(--line);background:rgba(255,255,255,.05)
+
+    .brandTitle{
+      font-weight:800;
+      font-size:clamp(16px,2.2vw,20px);
+      line-height:1.2;
     }
+
+    .brandSub{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:clamp(12px,1.8vw,14px);
+      line-height:1.3;
+    }
+
+    .statusRow{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      flex:1;
+    }
+
+    .pill,
+    .statusPill{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:40px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      font-size:14px;
+    }
+
+    .statusPill{
+      font-weight:700;
+    }
+
     .langSel{
       appearance:none;
       border:1px solid rgba(255,255,255,.16);
       background:rgba(255,255,255,.06);
       color:var(--text);
       border-radius:12px;
-      padding:8px 10px;
+      padding:9px 12px;
       font-weight:700;
       cursor:pointer;
+      min-height:40px;
     }
-    .statusPill{font-size:13px;font-weight:700}
-    .heartIcon{font-size:15px;line-height:1}
-    .hearts{width:140px;height:10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);overflow:hidden}
-    .hearts > i{display:block;height:100%;width:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width .25s ease}
-    .toggle{cursor:pointer;user-select:none}
-    .switch{width:42px;height:24px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);position:relative;transition:.18s ease}
-    .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,.85);box-shadow:0 8px 14px rgba(0,0,0,.25);transition:.18s ease}
-    .toggle[data-on="true"] .switch{background:rgba(154,230,180,.18);border-color:rgba(154,230,180,.28)}
-    .toggle[data-on="true"] .switch::after{left:20px;background:rgba(154,230,180,.95)}
-    .main{margin-top:14px;display:grid;grid-template-columns:1.45fr 1fr;gap:14px;align-items:start}
-    @media (max-width:900px){.main{grid-template-columns:1fr}}
-    .card{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .cardHeader{padding:12px 12px 10px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .cardHeader .h{font-weight:800;font-size:14px}
-    .cardHeader .hint{font-size:12px;color:var(--muted);margin-top:2px}
-    .cardContent{padding:12px}
+
+    .heartIcon{
+      font-size:17px;
+      line-height:1;
+    }
+
+    .hearts{
+      width:150px;
+      height:12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+
+    .hearts > i{
+      display:block;
+      width:50%;
+      height:100%;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      transition:width .25s ease;
+    }
+
+    .toggle{
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .switch{
+      position:relative;
+      width:46px;
+      height:25px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.08);
+      transition:.18s ease;
+      flex:0 0 auto;
+    }
+
+    .switch::after{
+      content:"";
+      position:absolute;
+      top:2px;
+      left:2px;
+      width:19px;
+      height:19px;
+      border-radius:999px;
+      background:rgba(255,255,255,.9);
+      box-shadow:0 8px 14px rgba(0,0,0,.25);
+      transition:.18s ease;
+    }
+
+    .toggle[data-on="true"] .switch{
+      background:rgba(154,230,180,.18);
+      border-color:rgba(154,230,180,.28);
+    }
+
+    .toggle[data-on="true"] .switch::after{
+      left:23px;
+      background:rgba(154,230,180,.98);
+    }
+
+    .main{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1.45fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    @media (max-width:920px){
+      .main{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.05);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:14px 14px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .cardHeader .h{
+      font-weight:800;
+      font-size:clamp(15px,2vw,18px);
+      line-height:1.2;
+    }
+
+    .cardHeader .hint{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:clamp(12px,1.7vw,14px);
+      line-height:1.4;
+    }
+
+    .cardContent{
+      padding:14px;
+    }
+
     button{
-      appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--text);
-      border-radius:14px;padding:12px 10px;cursor:pointer;font-weight:700;letter-spacing:.01em;
-      box-shadow:0 12px 26px rgba(0,0,0,.22);transition:transform .08s ease,background .18s ease,border-color .18s ease,opacity .18s ease
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius:16px;
+      padding:12px 12px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:.01em;
+      box-shadow:0 12px 26px rgba(0,0,0,.22);
+      transition:transform .08s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
     }
-    button:hover{transform:translateY(-1px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
-    button:active{transform:translateY(0) scale(.99)}
-    button[disabled]{opacity:.45;cursor:not-allowed;transform:none}
-    .btnGhost{background:rgba(255,255,255,.03)}
+
+    button:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.09);
+      border-color:rgba(255,255,255,.22);
+    }
+
+    button:active{
+      transform:translateY(0) scale(.99);
+    }
+
+    button[disabled]{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .btnGhost{
+      background:rgba(255,255,255,.03);
+    }
+
     .letterArrival{
       animation:letterPulse 1.2s ease-in-out infinite;
       border-color:rgba(196,181,253,.45) !important;
       box-shadow:0 0 0 0 rgba(196,181,253,.45), 0 12px 26px rgba(0,0,0,.22);
     }
+
     @keyframes letterPulse{
-      0%,100%{transform:translateY(0); box-shadow:0 0 0 0 rgba(196,181,253,.25), 0 12px 26px rgba(0,0,0,.22)}
-      50%{transform:translateY(-1px); box-shadow:0 0 0 10px rgba(196,181,253,0), 0 12px 26px rgba(0,0,0,.22)}
+      0%,100%{
+        transform:translateY(0);
+        box-shadow:0 0 0 0 rgba(196,181,253,.25), 0 12px 26px rgba(0,0,0,.22);
+      }
+      50%{
+        transform:translateY(-1px);
+        box-shadow:0 0 0 10px rgba(196,181,253,0), 0 12px 26px rgba(0,0,0,.22);
+      }
     }
-    .choiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+
+    .choiceGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin:8px 0;
+    }
+
     .choiceBtn{
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:86px;
-      padding:16px 12px!important;border-radius:16px;background:rgba(255,255,255,.06)!important;border:1.5px solid rgba(255,255,255,.14)!important
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:96px;
+      padding:16px 12px !important;
+      border-radius:18px;
+      background:rgba(255,255,255,.06) !important;
+      border:1.5px solid rgba(255,255,255,.14) !important;
+      text-align:center;
     }
-    .choiceBtn .icon{font-size:32px;line-height:1}
-    .choiceBtn .label{font-size:13px;font-weight:800;text-align:center;line-height:1.3}
-    .choiceBtn .sub{font-size:11px;color:var(--muted);text-align:center}
-    .stage{position:relative;min-height:560px;padding:14px;overflow:hidden}
+
+    .choiceBtn .icon{
+      font-size:34px;
+      line-height:1;
+    }
+
+    .choiceBtn .label{
+      font-size:15px;
+      font-weight:800;
+      line-height:1.3;
+    }
+
+    .choiceBtn .sub{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.3;
+    }
+
+    .stage{
+      position:relative;
+      min-height:600px;
+      overflow:hidden;
+      padding:18px 16px 22px;
+    }
+
     .stars{
-      position:absolute;inset:0;pointer-events:none;opacity:.55;
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.55;
       background-image:
-        radial-gradient(circle at 10% 20%, rgba(255,255,255,.8) 0 1px, transparent 2px),
-        radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-        radial-gradient(circle at 70% 30%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-        radial-gradient(circle at 85% 75%, rgba(255,255,255,.7) 0 1px, transparent 2px),
-        radial-gradient(circle at 25% 50%, rgba(255,255,255,.55) 0 1px, transparent 2px);
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.9) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 26% 75%, rgba(255,255,255,.75) 0 1px, transparent 2px),
+        radial-gradient(circle at 44% 44%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 72% 18%, rgba(255,255,255,.8) 0 1.1px, transparent 2px),
+        radial-gradient(circle at 84% 32%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 70% 68%, rgba(255,255,255,.75) 0 1px, transparent 2px),
+        radial-gradient(circle at 86% 86%, rgba(255,255,255,.7) 0 1px, transparent 2px);
       background-size:420px 260px;
-      animation:drift 18s linear infinite
+      animation:drift 18s linear infinite;
     }
-    @keyframes drift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-80px,50px,0)}}
-    .center{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px;z-index:10}
-    .entity{width:300px;height:300px;display:grid;place-items:center;position:relative}
-    .floaty{animation:floaty 3s ease-in-out infinite}
-    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+    @keyframes drift{
+      0%{ transform:translate3d(0,0,0) }
+      100%{ transform:translate3d(-80px,50px,0) }
+    }
+
+    .center{
+      position:relative;
+      z-index:2;
+      min-height:560px;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+    }
+
     .entityBubble{
-      position:absolute;top:-2px;right:4px;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
-      font-size:12px;color:var(--muted);backdrop-filter:blur(8px)
+      max-width:min(82%, 320px);
+      padding:12px 18px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(8px);
+      box-shadow:0 12px 26px rgba(0,0,0,.18);
+      color:var(--text);
+      text-align:center;
+      font-size:clamp(15px,2.2vw,20px);
+      line-height:1.35;
+      word-break:break-word;
     }
+
+    .entityWrap{
+      width:min(100%, 520px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:14px;
+    }
+
+    .entity{
+      position:relative;
+      width:min(76vw, 360px);
+      height:min(76vw, 360px);
+      max-width:360px;
+      max-height:360px;
+      display:grid;
+      place-items:center;
+    }
+
+    .floaty{
+      animation:floaty 3s ease-in-out infinite;
+    }
+
+    @keyframes floaty{
+      0%,100%{ transform:translateY(0) }
+      50%{ transform:translateY(-10px) }
+    }
+
     .entityVisual{
-      width:100%;height:100%;display:grid;place-items:center;position:relative;
-      transform-origin:50% 60%;transition:transform .35s ease;
+      position:relative;
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      transform-origin:50% 60%;
+      transition:transform .35s ease;
     }
+
     .entityImg{
-      width:260px;height:260px;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(0,0,0,.38));
+      display:none;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      filter:drop-shadow(0 20px 34px rgba(0,0,0,.38));
       transition:transform .35s ease, opacity .25s ease;
+      user-select:none;
+      -webkit-user-drag:none;
     }
+
+    .imageFallback{
+      display:none;
+      width:100%;
+      height:100%;
+      padding:16px;
+      border-radius:24px;
+      border:1px dashed rgba(255,255,255,.22);
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:clamp(14px,2vw,18px);
+      line-height:1.6;
+    }
+
     .tear{
-      position:absolute;width:14px;height:22px;border-radius:50% 50% 60% 60%;
+      position:absolute;
+      width:14px;
+      height:22px;
+      border-radius:50% 50% 60% 60%;
       background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(120,212,255,.85));
-      box-shadow:0 0 10px rgba(120,212,255,.38);opacity:0;pointer-events:none
+      box-shadow:0 0 10px rgba(120,212,255,.38);
+      opacity:0;
+      pointer-events:none;
     }
-    .tear.left{left:114px;top:122px}
-    .tear.right{right:114px;top:122px}
-    .crying .tear{opacity:1;animation:tearFall 1.6s ease-in-out infinite}
-    .crying .tear.right{animation-delay:.38s}
+
+    .tear.left{ left:31%; top:39%; }
+    .tear.right{ right:31%; top:39%; }
+
+    .crying .tear{
+      opacity:1;
+      animation:tearFall 1.6s ease-in-out infinite;
+    }
+
+    .crying .tear.right{
+      animation-delay:.38s;
+    }
+
     @keyframes tearFall{
-      0%{transform:translateY(0) scale(.7);opacity:0}
-      18%{opacity:1}
-      72%{opacity:1}
-      100%{transform:translateY(54px) scale(1);opacity:0}
+      0%{
+        transform:translateY(0) scale(.7);
+        opacity:0;
+      }
+      18%{ opacity:1; }
+      72%{ opacity:1; }
+      100%{
+        transform:translateY(54px) scale(1);
+        opacity:0;
+      }
     }
-    .sleepStatus{position:absolute;bottom:-42px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
-    .growthNote{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+
+    .entityMeta{
+      width:min(100%, 420px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+    }
+
+    .sleepStatus{
+      font-size:clamp(15px,2vw,18px);
+      color:var(--muted);
+      text-align:center;
+      line-height:1.45;
+      min-height:1.5em;
+    }
+
+    .growthNote{
+      font-size:clamp(17px,2.4vw,22px);
+      color:var(--text);
+      text-align:center;
+      line-height:1.45;
+      min-height:1.6em;
+      text-shadow:0 2px 10px rgba(0,0,0,.22);
+    }
+
+    .smallNote{
+      font-size:clamp(12px,1.7vw,14px);
+      color:var(--muted);
+      text-align:center;
+      line-height:1.5;
+    }
+
     .toast{
-      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
-      background:rgba(11,16,40,.92);color:var(--text);box-shadow:var(--shadow);z-index:110;display:none
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      z-index:110;
+      display:none;
+      padding:11px 16px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(11,16,40,.92);
+      color:var(--text);
+      box-shadow:var(--shadow);
+      font-size:14px;
     }
-    .toast.show{display:block;animation:toastIn .25s ease}
-    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-    .modalOverlay,.surveyGate,.poopGameContainer,.endingScreen{
-      position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);display:none;place-items:center;z-index:100
+
+    .toast.show{
+      display:block;
+      animation:toastIn .25s ease;
     }
-    .modalOverlay.show,.surveyGate.show,.endingScreen.show{display:grid}
-    .poopGameContainer.show{display:flex}
+
+    @keyframes toastIn{
+      from{
+        opacity:0;
+        transform:translateX(-50%) translateY(8px);
+      }
+      to{
+        opacity:1;
+        transform:translateX(-50%) translateY(0);
+      }
+    }
+
+    .modalOverlay,
+    .surveyGate,
+    .poopGameContainer,
+    .endingScreen{
+      position:fixed;
+      inset:0;
+      display:none;
+      place-items:center;
+      z-index:100;
+      background:rgba(0,0,0,.62);
+      backdrop-filter:blur(4px);
+    }
+
+    .modalOverlay.show,
+    .surveyGate.show,
+    .endingScreen.show{
+      display:grid;
+    }
+
+    .poopGameContainer.show{
+      display:flex;
+    }
+
     .modalBox{
-      background:rgba(11,16,40,.96);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:24px;
-      max-width:560px;width:min(92vw,560px);max-height:84vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)
+      width:min(92vw, 580px);
+      max-height:84vh;
+      overflow:auto;
+      padding:24px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(11,16,40,.96);
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
     }
-    .modalBox h2{margin:0 0 8px;font-size:18px}
-    .modalBox p,.modalBox small{color:var(--muted);line-height:1.7}
-    .modalBtn{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-    .modalBtn button{flex:1;min-width:140px}
-    .pairCard{margin-top:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
-    .pairProgress{font-size:12px;color:var(--muted);margin-bottom:8px}
-    .pairTitle{font-size:16px;font-weight:800;margin-bottom:12px}
-    .pairBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .choiceModalBtn{min-height:86px;display:flex;align-items:center;justify-content:center;font-size:16px}
-    .historyHint{font-size:12px;color:var(--muted);margin-top:12px}
+
+    .modalBox h2{
+      margin:0 0 10px;
+      font-size:clamp(18px,2.4vw,24px);
+      line-height:1.3;
+    }
+
+    .modalBox p,
+    .modalBox small{
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .modalBtn{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .modalBtn button{
+      flex:1;
+      min-width:140px;
+    }
+
+    .pairCard{
+      margin-top:12px;
+      padding:16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+    }
+
+    .pairProgress{
+      margin-bottom:8px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .pairTitle{
+      margin-bottom:12px;
+      font-size:clamp(17px,2.2vw,22px);
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .pairBtns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    @media (max-width:560px){
+      .pairBtns{
+        grid-template-columns:1fr;
+      }
+      .choiceGrid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    .choiceModalBtn{
+      min-height:86px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      line-height:1.4;
+      text-align:center;
+    }
+
+    .historyHint{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
     .poopGameContainer{
-      flex-direction:column;align-items:center;justify-content:center;gap:20px;
-      background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:120
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      z-index:120;
+      background:
+        linear-gradient(180deg, rgba(5,8,22,.58), rgba(11,16,40,.85)),
+        var(--bg-image) center/cover no-repeat fixed,
+        linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
     }
-    .poopGameTitle{font-size:32px;font-weight:900}
-    .poopGameArea{width:320px;height:320px;border:2px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.03);position:relative;overflow:hidden}
-    .poop{position:absolute;width:42px;height:42px;display:grid;place-items:center;font-size:28px;cursor:pointer;user-select:none;animation:poopBounce .6s ease-out}
-    @keyframes poopBounce{0%{transform:scale(0);opacity:1}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-    .poop:hover{transform:scale(1.14)}
-    .poopScore{font-size:24px;font-weight:800}
-    .poopHint{font-size:12px;color:var(--muted)}
-    .surveyGate{background:linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));z-index:90}
-    .surveyPanel{width:min(92vw,560px);padding:28px;border-radius:24px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);text-align:center;box-shadow:var(--shadow)}
-    .surveyPanel .icon{font-size:58px;margin-bottom:10px;animation:bounce 1.2s ease infinite}
-    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    .surveyPanel .title{font-size:24px;font-weight:900;margin-bottom:10px}
-    .surveyPanel .desc{color:var(--muted);line-height:1.7;margin-bottom:18px}
-    .endingScreen .thanks{font-size:42px;font-weight:900;letter-spacing:.08em}
-    .endingScreen .sub{margin-top:12px;color:var(--muted);text-align:center;line-height:1.8}
-    .logList{display:flex;flex-direction:column;gap:12px}
-    .logDay{padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.03)}
-    .logDay h3{margin:0 0 8px;font-size:14px}
-    .logDay ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.7}
+
+    .poopGameTitle{
+      font-size:clamp(28px,4vw,40px);
+      font-weight:900;
+      text-align:center;
+    }
+
+    .poopGameArea{
+      position:relative;
+      width:min(86vw, 360px);
+      height:min(86vw, 360px);
+      border-radius:20px;
+      border:2px solid rgba(255,255,255,.2);
+      background:rgba(255,255,255,.03);
+      overflow:hidden;
+    }
+
+    .poop{
+      position:absolute;
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      font-size:30px;
+      cursor:pointer;
+      user-select:none;
+      animation:poopBounce .6s ease-out;
+    }
+
+    .poop:hover{
+      transform:scale(1.14);
+    }
+
+    @keyframes poopBounce{
+      0%{
+        transform:scale(0);
+        opacity:1;
+      }
+      50%{
+        transform:scale(1.1);
+      }
+      100%{
+        transform:scale(1);
+      }
+    }
+
+    .poopScore{
+      font-size:clamp(22px,3vw,28px);
+      font-weight:800;
+    }
+
+    .poopHint{
+      font-size:13px;
+      color:var(--muted);
+      text-align:center;
+      line-height:1.6;
+    }
+
+    .surveyGate{
+      z-index:90;
+      background:
+        linear-gradient(180deg, rgba(5,8,22,.62), rgba(11,16,40,.88)),
+        var(--bg-image) center/cover no-repeat fixed,
+        linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
+    }
+
+    .surveyPanel{
+      width:min(92vw, 560px);
+      padding:28px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+      text-align:center;
+      box-shadow:var(--shadow);
+    }
+
+    .surveyPanel .icon{
+      font-size:58px;
+      margin-bottom:10px;
+      animation:bounce 1.2s ease infinite;
+    }
+
+    @keyframes bounce{
+      0%,100%{ transform:translateY(0) }
+      50%{ transform:translateY(-10px) }
+    }
+
+    .surveyPanel .title{
+      font-size:clamp(24px,3.3vw,34px);
+      font-weight:900;
+      margin-bottom:10px;
+    }
+
+    .surveyPanel .desc{
+      color:var(--muted);
+      line-height:1.8;
+      margin-bottom:18px;
+      font-size:15px;
+    }
+
+    .endingScreen .thanks{
+      font-size:clamp(36px,5vw,52px);
+      font-weight:900;
+      letter-spacing:.08em;
+      text-align:center;
+    }
+
+    .endingScreen .sub{
+      margin-top:12px;
+      color:var(--muted);
+      text-align:center;
+      line-height:1.8;
+    }
+
+    .logList{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .logDay{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+    }
+
+    .logDay h3{
+      margin:0 0 10px;
+      font-size:16px;
+      line-height:1.3;
+    }
+
+    .logDay ul{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      line-height:1.8;
+      font-size:14px;
+    }
+
+    .hidden{
+      display:none !important;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-        <div class="dot"></div>
+        <div class="brandDot"></div>
         <div>
-          <div class="title" id="brandTitle">お世話ゲーム</div>
-          <div class="sub"><span id="dayLabel">Day</span> <span id="dayNum">1</span> / 3</div>
+          <div class="brandTitle" id="brandTitle">お世話ゲーム</div>
+          <div class="brandSub"><span id="dayLabel">Day</span> <span id="dayNum">1</span> / 3</div>
         </div>
       </div>
+
       <div class="statusRow">
-        <select id="langSel" class="langSel">
+        <select id="langSel" class="langSel" aria-label="language">
           <option value="ja">日本語</option>
           <option value="en">English</option>
           <option value="zh">中文</option>
         </select>
+
         <div class="statusPill" id="statusText">静かな時間</div>
-        <div class="statusPill" id="countdownText">残り 3d 00:00:00</div>
+
         <div class="pill">
           <span class="heartIcon">💗</span>
           <div class="hearts"><i id="heartFill"></i></div>
-          <small id="heartVal">?/10</small>
+          <small id="heartVal">5/10</small>
         </div>
+
         <div class="pill toggle" id="sitterToggle" data-on="false" title="Sitter Mode">
           <small id="sitterLabel">シッター</small>
           <div class="switch"></div>
@@ -238,20 +858,30 @@
             <div class="hint" id="charStatus">準備中...</div>
           </div>
         </div>
-        <div class="cardContent" style="position:relative; min-height:560px; padding:0;">
+
+        <div class="cardContent" style="padding:0;">
           <div class="stage">
             <div class="stars"></div>
+
             <div class="center">
-              <div class="entity floaty">
-                <div class="entityBubble" id="entityBubble">まってる</div>
-                <div class="entityVisual" id="entityVisual">
-                  <img id="entityImg" class="entityImg" alt="character">
-                  <i class="tear left"></i>
-                  <i class="tear right"></i>
+              <div class="entityBubble" id="entityBubble">どんな子かな？ ちょっと待ってね</div>
+
+              <div class="entityWrap">
+                <div class="entity floaty">
+                  <div class="entityVisual" id="entityVisual">
+                    <img id="entityImg" class="entityImg" alt="">
+                    <div class="imageFallback" id="imageFallback">画像が見つかりませんでした。<br>ファイル名か置き場所を確認してください。</div>
+                    <i class="tear left"></i>
+                    <i class="tear right"></i>
+                  </div>
                 </div>
-                <div class="sleepStatus" id="sleepStatus"></div>
+
+                <div class="entityMeta">
+                  <div class="sleepStatus" id="sleepStatus">ふ化まで 60s</div>
+                  <div class="growthNote" id="growthNote">マカロンは1分後に生まれます</div>
+                  <div class="smallNote" id="smallNote">状態は表情や動きで変わります</div>
+                </div>
               </div>
-              <div class="growthNote" id="growthNote">マカロンは1分後に生まれます</div>
             </div>
           </div>
         </div>
@@ -263,18 +893,20 @@
             <div class="h" id="commandTitle">コマンド</div>
             <div class="hint" id="commandHint">ごはんは20種類の2択を順番に出します</div>
           </div>
-          <button style="width:auto; padding:8px 10px; font-size:11px; visibility:hidden;" id="btnLetter">💌 手紙を読む</button>
+          <button id="btnLetter" style="width:auto; padding:8px 10px; font-size:12px; visibility:hidden;">💌 手紙を読む</button>
         </div>
+
         <div class="cardContent">
           <div style="display:flex; flex-direction:column; gap:8px;">
             <div>
-              <small style="color:var(--muted); display:block; margin-bottom:4px;" id="foodGroupTitle">ごはん</small>
+              <small id="foodGroupTitle" style="color:var(--muted); display:block; margin-bottom:4px;">ごはん</small>
               <div class="choiceGrid">
                 <button class="choiceBtn" id="btnFood">
                   <span class="icon">🍚</span>
                   <span class="label" id="btnFoodLabel">ごはん</span>
                   <span class="sub" id="btnFoodSub">20この2たく</span>
                 </button>
+
                 <button class="choiceBtn" id="btnOut">
                   <span class="icon">🌳</span>
                   <span class="label" id="btnOutLabel">おでかけ</span>
@@ -282,14 +914,16 @@
                 </button>
               </div>
             </div>
+
             <div>
-              <small style="color:var(--muted); display:block; margin-bottom:4px;" id="playGroupTitle">遊び</small>
+              <small id="playGroupTitle" style="color:var(--muted); display:block; margin-bottom:4px;">遊び</small>
               <div class="choiceGrid">
                 <button class="choiceBtn" id="btnStyle">
                   <span class="icon">✨</span>
                   <span class="label" id="btnStyleLabel">スタイル</span>
                   <span class="sub" id="btnStyleSub">2たく</span>
                 </button>
+
                 <button class="choiceBtn" id="btnDrink">
                   <span class="icon">🧃</span>
                   <span class="label" id="btnDrinkLabel">ドリンク</span>
@@ -297,14 +931,16 @@
                 </button>
               </div>
             </div>
+
             <div>
-              <small style="color:var(--muted); display:block; margin-bottom:4px;" id="careGroupTitle">ケア</small>
+              <small id="careGroupTitle" style="color:var(--muted); display:block; margin-bottom:4px;">ケア</small>
               <div class="choiceGrid">
                 <button class="choiceBtn" id="btnClean">
                   <span class="icon">🧹</span>
                   <span class="label" id="btnCleanLabel">そうじ</span>
                   <span class="sub" id="btnCleanSub">💩ゲーム</span>
                 </button>
+
                 <button class="choiceBtn" id="btnMacaron">
                   <span class="icon">🍪</span>
                   <span class="label" id="btnMacaronLabel">マカロン</span>
@@ -313,18 +949,19 @@
               </div>
             </div>
           </div>
+
           <hr style="border:0; border-top:1px solid rgba(255,255,255,.08); margin:12px 0;">
+
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <button style="width:100%;" id="btnName">名前を決める</button>
-            <button style="width:100%;" class="btnGhost" id="btnLogs">📊 ログ</button>
-            <button style="width:100%;" class="btnGhost" id="btnReset">🔄 リセット</button>
+            <button id="btnName" style="width:100%;">名前を決める</button>
+            <button id="btnLogs" class="btnGhost" style="width:100%;">📊 ログ</button>
+            <button id="btnReset" class="btnGhost" style="width:100%;">🔄 リセット</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Survey Gate -->
   <div class="surveyGate" id="surveyGate">
     <div class="surveyPanel">
       <div class="icon">📋</div>
@@ -334,11 +971,11 @@
     </div>
   </div>
 
-  <!-- Choice Modal -->
   <div class="modalOverlay" id="choiceModal">
     <div class="modalBox">
       <h2 id="choiceModalTitle">2択</h2>
       <small id="choiceModalDesc">どちらかを選ぶ</small>
+
       <div class="pairCard">
         <div class="pairProgress" id="choiceProgress">1 / 20</div>
         <div class="pairTitle" id="choiceQuestion">どっちにする？</div>
@@ -347,23 +984,23 @@
           <button class="choiceModalBtn" id="choiceRight">右</button>
         </div>
       </div>
+
       <div class="historyHint" id="choiceHint">選ぶたびに次の2択へ進みます。</div>
+
       <div class="modalBtn">
         <button class="btnGhost" id="btnChoiceClose">閉じる</button>
       </div>
     </div>
   </div>
 
-  <!-- Letter Modal -->
   <div class="modalOverlay" id="letterModal">
     <div class="modalBox">
       <h2 id="letterTitle">💌 お手紙</h2>
-      <div style="background:rgba(255,255,255,.05); border-radius:12px; padding:16px; margin:16px 0; line-height:1.8; white-space:pre-wrap; font-size:13px; color:var(--muted);" id="letterContent"></div>
-      <button style="width:100%; margin-top:16px;" id="btnLetterClose">手紙を閉じる</button>
+      <div id="letterContent" style="background:rgba(255,255,255,.05); border-radius:12px; padding:16px; margin:16px 0; line-height:1.9; white-space:pre-wrap; font-size:14px; color:var(--muted);"></div>
+      <button id="btnLetterClose" style="width:100%; margin-top:16px;">手紙を閉じる</button>
     </div>
   </div>
 
-  <!-- Logs Modal -->
   <div class="modalOverlay" id="logsModal">
     <div class="modalBox">
       <h2 id="logsTitle">3日間の記録</h2>
@@ -374,7 +1011,6 @@
     </div>
   </div>
 
-  <!-- Poop Game -->
   <div class="poopGameContainer" id="poopGame">
     <div class="poopGameTitle" id="poopTitle">そうじ</div>
     <div class="poopGameArea" id="poopGameArea"></div>
@@ -383,14 +1019,13 @@
     <button id="btnPoopExit">終わる</button>
   </div>
 
-  <!-- Ending Screen -->
   <div class="endingScreen" id="endingScreen">
     <div class="modalBox" style="text-align:center;">
       <div class="thanks" id="thanksText">ありがとう</div>
       <div class="sub" id="thanksSub">3日間の記録だけが、静かに残ります。</div>
       <div class="modalBtn">
         <button id="btnEndingLogs">ログを見る</button>
-        <button class="btnGhost" id="btnEndingClose">閉じる</button>
+        <button id="btnEndingClose" class="btnGhost">閉じる</button>
       </div>
     </div>
   </div>
@@ -401,108 +1036,234 @@
   (() => {
     "use strict";
 
-    const SAVE_KEY              = "tosewa_save_v5";
-    const GIFT_SURVEY_DONE_KEY  = "gift_survey_done";
-    const GIFT_SURVEY_DONE_AT   = "gift_survey_done_at";
-    const OSEWA_SURVEY_DONE_KEY = "osewa_survey_done_v1";
-    const OSEWA_SURVEY_DONE_AT  = "osewa_survey_done_at_v1";
-    const LANG_KEY              = "osewa_lang_v1";
+    const SAVE_KEY = "tosewa_save_v6";
+    const LANG_KEY = "osewa_lang_v2";
+    const USE_SURVEY_GATE = false;
 
-    const HATCH_MS         = 1 * 60 * 1000;
+    const GIFT_SURVEY_DONE_KEY = "gift_survey_done";
+    const OSEWA_SURVEY_DONE_KEY = "osewa_survey_done_v1";
+
+    const HATCH_MS = 1 * 60 * 1000;
     const LETTER_ARRIVE_MS = 8 * 1000;
-    const DAY_MS           = 24 * 60 * 60 * 1000;
-    const TOTAL_DAYS       = 3;
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const TOTAL_DAYS = 3;
     const POOP_COUNT_TARGET = 5;
 
     const COLORS = ["blue", "green", "pink", "purple"];
 
-    const ASSETS = {
-      blue:   { macaron: ["./macaron_blue.png"],   open: ["./blue_open.png"],   closed: ["./blue_closed.png",   "./blue_open.png"],   sleep: ["./blue_sleep.png",   "./blue_open.png"]   },
-      green:  { macaron: ["./macaron_green.png"],  open: ["./green_open.png"],  closed: ["./green_closed.png",  "./green_open.png"],  sleep: ["./green_sleep.png",  "./green_open.png"]  },
-      pink:   { macaron: ["./macaron_pink.png"],   open: ["./pink_open.png"],   closed: ["./pink_closed.png",   "./pink_open.png"],   sleep: ["./pink_sleep.png",   "./pink_open.png"]   },
-      purple: { macaron: ["./macaron_purple.png"], open: ["./purple_open.png"], closed: ["./purple_closed.png", "./purple_open.png"], sleep: ["./purple_sleep.png", "./purple_sleep .png", "./purple_open.png"] }
+    const ui = {
+      langSel: document.getElementById("langSel"),
+      brandTitle: document.getElementById("brandTitle"),
+      dayLabel: document.getElementById("dayLabel"),
+      dayNum: document.getElementById("dayNum"),
+      statusText: document.getElementById("statusText"),
+      heartFill: document.getElementById("heartFill"),
+      heartVal: document.getElementById("heartVal"),
+      sitterToggle: document.getElementById("sitterToggle"),
+      sitterLabel: document.getElementById("sitterLabel"),
+      charCardTitle: document.getElementById("charCardTitle"),
+      charStatus: document.getElementById("charStatus"),
+      entityImg: document.getElementById("entityImg"),
+      imageFallback: document.getElementById("imageFallback"),
+      entityBubble: document.getElementById("entityBubble"),
+      entityVisual: document.getElementById("entityVisual"),
+      sleepStatus: document.getElementById("sleepStatus"),
+      growthNote: document.getElementById("growthNote"),
+      smallNote: document.getElementById("smallNote"),
+
+      commandTitle: document.getElementById("commandTitle"),
+      commandHint: document.getElementById("commandHint"),
+      foodGroupTitle: document.getElementById("foodGroupTitle"),
+      playGroupTitle: document.getElementById("playGroupTitle"),
+      careGroupTitle: document.getElementById("careGroupTitle"),
+
+      btnFood: document.getElementById("btnFood"),
+      btnFoodLabel: document.getElementById("btnFoodLabel"),
+      btnFoodSub: document.getElementById("btnFoodSub"),
+
+      btnOut: document.getElementById("btnOut"),
+      btnOutLabel: document.getElementById("btnOutLabel"),
+      btnOutSub: document.getElementById("btnOutSub"),
+
+      btnStyle: document.getElementById("btnStyle"),
+      btnStyleLabel: document.getElementById("btnStyleLabel"),
+      btnStyleSub: document.getElementById("btnStyleSub"),
+
+      btnDrink: document.getElementById("btnDrink"),
+      btnDrinkLabel: document.getElementById("btnDrinkLabel"),
+      btnDrinkSub: document.getElementById("btnDrinkSub"),
+
+      btnClean: document.getElementById("btnClean"),
+      btnCleanLabel: document.getElementById("btnCleanLabel"),
+      btnCleanSub: document.getElementById("btnCleanSub"),
+
+      btnMacaron: document.getElementById("btnMacaron"),
+      btnMacaronLabel: document.getElementById("btnMacaronLabel"),
+      btnMacaronSub: document.getElementById("btnMacaronSub"),
+
+      btnName: document.getElementById("btnName"),
+      btnLogs: document.getElementById("btnLogs"),
+      btnReset: document.getElementById("btnReset"),
+      btnLetter: document.getElementById("btnLetter"),
+
+      surveyGate: document.getElementById("surveyGate"),
+      surveyGateTitle: document.getElementById("surveyGateTitle"),
+      surveyGateDesc: document.getElementById("surveyGateDesc"),
+      btnGoSurvey: document.getElementById("btnGoSurvey"),
+
+      choiceModal: document.getElementById("choiceModal"),
+      choiceModalTitle: document.getElementById("choiceModalTitle"),
+      choiceModalDesc: document.getElementById("choiceModalDesc"),
+      choiceProgress: document.getElementById("choiceProgress"),
+      choiceQuestion: document.getElementById("choiceQuestion"),
+      choiceLeft: document.getElementById("choiceLeft"),
+      choiceRight: document.getElementById("choiceRight"),
+      choiceHint: document.getElementById("choiceHint"),
+      btnChoiceClose: document.getElementById("btnChoiceClose"),
+
+      letterModal: document.getElementById("letterModal"),
+      letterTitle: document.getElementById("letterTitle"),
+      letterContent: document.getElementById("letterContent"),
+      btnLetterClose: document.getElementById("btnLetterClose"),
+
+      logsModal: document.getElementById("logsModal"),
+      logsTitle: document.getElementById("logsTitle"),
+      logsContent: document.getElementById("logsContent"),
+      btnLogsClose: document.getElementById("btnLogsClose"),
+
+      poopGame: document.getElementById("poopGame"),
+      poopTitle: document.getElementById("poopTitle"),
+      poopGameArea: document.getElementById("poopGameArea"),
+      poopScore: document.getElementById("poopScore"),
+      poopHint: document.getElementById("poopHint"),
+      btnPoopExit: document.getElementById("btnPoopExit"),
+
+      endingScreen: document.getElementById("endingScreen"),
+      thanksText: document.getElementById("thanksText"),
+      thanksSub: document.getElementById("thanksSub"),
+      btnEndingLogs: document.getElementById("btnEndingLogs"),
+      btnEndingClose: document.getElementById("btnEndingClose"),
+
+      toast: document.getElementById("toast")
     };
 
     const L3 = (ja, en, zh) => ({ ja, en, zh });
 
     const FOOD_CHOICES = [
-      [L3("ごはん","Rice","米饭"),           L3("パン","Bread","面包")],
-      [L3("みそしる","Miso soup","味噌汤"),  L3("スープ","Soup","汤")],
-      [L3("りんご","Apple","苹果"),          L3("バナナ","Banana","香蕉")],
-      [L3("おにぎり","Rice ball","饭团"),    L3("サンドイッチ","Sandwich","三明治")],
-      [L3("おちゃ","Tea","茶"),              L3("ジュース","Juice","果汁")],
-      [L3("うどん","Udon","乌冬面"),         L3("パスタ","Pasta","意面")],
-      [L3("いちご","Strawberry","草莓"),     L3("ぶどう","Grapes","葡萄")],
-      [L3("クッキー","Cookie","曲奇"),       L3("ビスケット","Biscuit","饼干")],
+      [L3("ごはん","Rice","米饭"), L3("パン","Bread","面包")],
+      [L3("みそしる","Miso soup","味噌汤"), L3("スープ","Soup","汤")],
+      [L3("りんご","Apple","苹果"), L3("バナナ","Banana","香蕉")],
+      [L3("おにぎり","Rice ball","饭团"), L3("サンドイッチ","Sandwich","三明治")],
+      [L3("おちゃ","Tea","茶"), L3("ジュース","Juice","果汁")],
+      [L3("うどん","Udon","乌冬面"), L3("パスタ","Pasta","意面")],
+      [L3("いちご","Strawberry","草莓"), L3("ぶどう","Grapes","葡萄")],
+      [L3("クッキー","Cookie","曲奇"), L3("ビスケット","Biscuit","饼干")],
       [L3("オムライス","Omelet rice","蛋包饭"), L3("カレー","Curry","咖喱")],
-      [L3("プリン","Pudding","布丁"),        L3("ゼリー","Jelly","果冻")],
+      [L3("プリン","Pudding","布丁"), L3("ゼリー","Jelly","果冻")],
       [L3("コーンスープ","Corn soup","玉米汤"), L3("ポタージュ","Potage","浓汤")],
-      [L3("ミルク","Milk","牛奶"),           L3("ヨーグルト","Yogurt","酸奶")],
-      [L3("さかな","Fish","鱼"),             L3("おにく","Meat","肉")],
+      [L3("ミルク","Milk","牛奶"), L3("ヨーグルト","Yogurt","酸奶")],
+      [L3("さかな","Fish","鱼"), L3("おにく","Meat","肉")],
       [L3("たまごやき","Egg roll","玉子烧"), L3("ハム","Ham","火腿")],
-      [L3("チーズ","Cheese","奶酪"),         L3("バター","Butter","黄油")],
-      [L3("ホットケーキ","Pancake","松饼"),  L3("ワッフル","Waffle","华夫饼")],
-      [L3("マカロン","Macaron","马卡龙"),    L3("マシュマロ","Marshmallow","棉花糖")],
-      [L3("トマト","Tomato","番茄"),         L3("にんじん","Carrot","胡萝卜")],
-      [L3("ラーメン","Ramen","拉面"),        L3("やきそば","Fried noodles","炒面")],
-      [L3("おもち","Rice cake","年糕"),      L3("どらやき","Dorayaki","铜锣烧")]
+      [L3("チーズ","Cheese","奶酪"), L3("バター","Butter","黄油")],
+      [L3("ホットケーキ","Pancake","松饼"), L3("ワッフル","Waffle","华夫饼")],
+      [L3("マカロン","Macaron","马卡龙"), L3("マシュマロ","Marshmallow","棉花糖")],
+      [L3("トマト","Tomato","番茄"), L3("にんじん","Carrot","胡萝卜")],
+      [L3("ラーメン","Ramen","拉面"), L3("やきそば","Fried noodles","炒面")],
+      [L3("おもち","Rice cake","年糕"), L3("どらやき","Dorayaki","铜锣烧")]
     ];
 
     const OUT_CHOICES = [
-      [L3("外に出る","Go outside","出去"),       L3("家で過ごす","Stay inside","待在家里")],
-      [L3("星を見る","Watch stars","看星星"),     L3("音を聞く","Listen to sounds","听声音")],
-      [L3("さんぽ","Walk","散步"),               L3("ごろごろ","Lounge","打滚休息")],
-      [L3("ひなたぼっこ","Sunbathe","晒太阳"),   L3("日かげで休む","Rest in shade","在阴凉处休息")],
+      [L3("外に出る","Go outside","出去"), L3("家で過ごす","Stay inside","待在家里")],
+      [L3("星を見る","Watch stars","看星星"), L3("音を聞く","Listen to sounds","听声音")],
+      [L3("さんぽ","Walk","散步"), L3("ごろごろ","Lounge","打滚休息")],
+      [L3("ひなたぼっこ","Sunbathe","晒太阳"), L3("日かげで休む","Rest in shade","在阴凉处休息")],
       [L3("遠くへ行く","Go farther","走远一点"), L3("近くで遊ぶ","Stay nearby","在附近玩")],
       [L3("ひとりで歩く","Walk alone","自己走"), L3("いっしょに歩く","Walk together","一起走")],
       [L3("風にあたる","Feel the breeze","吹吹风"), L3("ぬくぬくする","Stay cozy","暖洋洋地待着")],
-      [L3("雲を見る","Watch clouds","看云"),     L3("床にころぶ","Roll on the floor","在地板上打滚")],
+      [L3("雲を見る","Watch clouds","看云"), L3("床にころぶ","Roll on the floor","在地板上打滚")],
       [L3("月を見る","Watch the moon","看月亮"), L3("明かりを見る","Watch lights","看灯光")],
-      [L3("のんびり進む","Go slowly","慢慢走"),  L3("ちょっと急ぐ","Hurry a little","稍微快一点")]
+      [L3("のんびり進む","Go slowly","慢慢走"), L3("ちょっと急ぐ","Hurry a little","稍微快一点")]
     ];
 
     const STYLE_CHOICES = [
-      [L3("ぼうし","Hat","帽子"),             L3("りぼん","Ribbon","丝带")],
-      [L3("キラキラ","Sparkly","闪亮"),       L3("ふわふわ","Fluffy","软绵绵")],
+      [L3("ぼうし","Hat","帽子"), L3("りぼん","Ribbon","丝带")],
+      [L3("キラキラ","Sparkly","闪亮"), L3("ふわふわ","Fluffy","软绵绵")],
       [L3("青い飾り","Blue decoration","蓝色装饰"), L3("紫の飾り","Purple decoration","紫色装饰")],
       [L3("ほし模様","Star pattern","星星花纹"), L3("月模様","Moon pattern","月亮花纹")],
       [L3("まるい感じ","Round feeling","圆润风"), L3("すっとした感じ","Slim feeling","修长风")],
       [L3("やわらかい光","Soft glow","柔和光"), L3("つよい光","Bright glow","强光")],
       [L3("うさみみ風","Bunny-ear style","兔耳风"), L3("たれみみ風","Floppy-ear style","垂耳风")],
-      [L3("小さめ","Smaller","偏小"),         L3("ふっくら","Plump","圆鼓鼓")],
+      [L3("小さめ","Smaller","偏小"), L3("ふっくら","Plump","圆鼓鼓")],
       [L3("静かな色","Calm color","安静的颜色"), L3("にぎやかな色","Lively color","热闹的颜色")],
-      [L3("おだやか","Calm","温和"),           L3("元気","Energetic","有精神")]
+      [L3("おだやか","Calm","温和"), L3("元気","Energetic","有精神")]
     ];
 
     const TXT = {
       ja: {
-        brandTitle:"お世話ゲーム", dayLabel:"Day", sitter:"シッター",
-        charCardTitle:"キャラ", charPreparing:"準備中...",
-        commandTitle:"コマンド", commandHint:"ごはんは20種類の2択を順番に出します",
-        foodGroupTitle:"ごはん", playGroupTitle:"遊び", careGroupTitle:"ケア",
-        btnFoodLabel:"ごはん", btnFoodSub:"20この2たく",
-        btnOutLabel:"おでかけ", btnOutSub:"2たく",
-        btnStyleLabel:"スタイル", btnStyleSub:"2たく",
-        btnDrinkLabel:"ドリンク", btnDrinkSub:"少し元気",
-        btnCleanLabel:"そうじ", btnCleanSub:"💩ゲーム",
-        btnMacaronLabel:"マカロン", btnMacaronSub:"少し回復",
-        btnName:"名前を決める", btnLogs:"📊 ログ", btnReset:"🔄 リセット",
+        brandTitle:"お世話ゲーム",
+        dayLabel:"Day",
+        sitter:"シッター",
+        charCardTitle:"キャラ",
+        charPreparing:"準備中...",
+        commandTitle:"コマンド",
+        commandHint:"ごはんは20種類の2択を順番に出します",
+        foodGroupTitle:"ごはん",
+        playGroupTitle:"遊び",
+        careGroupTitle:"ケア",
+
+        btnFoodLabel:"ごはん",
+        btnFoodSub:"20この2たく",
+        btnOutLabel:"おでかけ",
+        btnOutSub:"2たく",
+        btnStyleLabel:"スタイル",
+        btnStyleSub:"2たく",
+        btnDrinkLabel:"ドリンク",
+        btnDrinkSub:"少し元気",
+        btnCleanLabel:"そうじ",
+        btnCleanSub:"💩ゲーム",
+        btnMacaronLabel:"マカロン",
+        btnMacaronSub:"少し回復",
+        btnName:"名前を決める",
+        btnLogs:"📊 ログ",
+        btnReset:"🔄 リセット",
+        letterBtn:"💌 手紙を読む",
+
         surveyGateTitle:"ゲーム開始前に",
         surveyGateDesc:"アンケートに回答したあと、Googleフォームの送信完了画面にあるリンクからこのゲームへ戻ります。",
         btnGoSurvey:"アンケートへ進む",
-        letterBtn:"💌 手紙を読む", letterTitle:"💌 お手紙", letterClose:"手紙を閉じる",
-        logsTitle:"3日間の記録", logsClose:"閉じる",
-        poopTitle:"そうじ", poopHint:"💩をタップしてきれいにしよう", poopExit:"終わる",
-        choiceModalTitle:"2択", choiceModalDesc:"どちらかを選ぶ",
-        choiceHintFood:"選ぶたびに次の2択へ進みます。", choiceHintOther:"選ぶと記録に残ります。",
+
+        letterTitle:"💌 お手紙",
+        letterClose:"手紙を閉じる",
+
+        logsTitle:"3日間の記録",
+        logsClose:"閉じる",
+
+        poopTitle:"そうじ",
+        poopHint:"💩をタップしてきれいにしよう",
+        poopExit:"終わる",
+
+        choiceModalTitle:"2択",
+        choiceModalDesc:"どちらかを選ぶ",
+        choiceHintFood:"選ぶたびに次の2択へ進みます。",
+        choiceHintOther:"選ぶと記録に残ります。",
         choiceClose:"閉じる",
-        thanks:"ありがとう", thanksSub:"3日間の記録だけが、静かに残ります。",
-        endingLogs:"ログを見る", endingClose:"閉じる",
-        statusQuiet:"静かな時間", statusMacaron:"マカロンの時間",
-        statusSick:"少しつらそう", statusNight:"夜の眠り", statusDay:"今日もいっしょ",
+
+        thanks:"ありがとう",
+        thanksSub:"3日間の記録だけが、静かに残ります。",
+        endingLogs:"ログを見る",
+        endingClose:"閉じる",
+
+        statusQuiet:"静かな時間",
+        statusMacaron:"マカロンの時間",
+        statusSick:"少しつらそう",
+        statusNight:"夜の眠り",
+        statusDay:"今日もいっしょ",
+
         preHatchBubble:"どんな子かな？ ちょっと待ってね",
-        preHatchSleep:"ふ化まで", preHatchStatus:"マカロンが静かに待っている",
+        preHatchStatus:"マカロンが静かに待っている",
         preHatchGrowth:"マカロンは1分後に生まれます",
+        preHatchSleep:(sec) => `ふ化まで ${sec}s`,
+
         bornToast:"マカロンが、その色の子になりました。",
         letterToast:"ふわっと、お手紙が届きました。",
         surveyToast:"アンケートありがとう。ゲームを始めます。",
@@ -510,127 +1271,268 @@
         macaronToast:"甘い時間が過ぎました。",
         cleanToast:"きれいになりました。",
         growthToast:"少し大きくなったみたいです。",
+
         namePrompt:"名前を入力してください:",
-        nameToastPrefix:"「", nameToastSuffix:"」になりました。",
+        nameToastPrefix:"「",
+        nameToastSuffix:"」になりました。",
         resetConfirm:"本当にリセットしますか？",
-        sickBubble:"ぽろぽろ", nightBubble:"すやすや", awakeBubble:"こんにちは",
-        sickSleep:"具合がよくなさそう", nightSleep:"夜なので眠っている", awakeSleep:"起きている",
+
+        sickBubble:"ぽろぽろ",
+        nightBubble:"すやすや",
+        awakeBubble:"こんにちは",
+
+        sickSleep:"具合がよくなさそう",
+        nightSleep:"夜なので眠っている",
+        awakeSleep:"起きている",
+
         growthNames:["まだ小さい","少し育った","だいぶ育った","すっかり育った"],
         growthFormat:(count, label) => `${count}回えらんだ / ${label}`,
-        statusHunger:"おなかがすいていそう", statusTired:"少しつかれていそう",
-        statusDirty:"そろそろそうじしたいかも", statusTogether:"いっしょにいる",
-        remaining:"残り", hatchIn:"ふ化まで",
-        choiceQuestion:(a, b) => `${a} にする？ それとも ${b}？`,
-        foodChoiceLog:  s => `ごはんで「${s}」を選んだ`,
-        outChoiceLog:   s => `おでかけで「${s}」を選んだ`,
-        styleChoiceLog: s => `スタイルで「${s}」を選んだ`,
-        foodChoiceToast:  s => `今日は「${s}」にしました。`,
-        otherChoiceToast: s => `「${s}」を選びました。`,
-        bornLog:    color => `${color}の子が生まれた`,
-        letterLog:  "手紙が届いた", letterOpenLog: "手紙を読んだ",
-        letterText: `見つけてくれたあなたへ\n\nこの子は、マカロンの姿でやってきました。\n1分たつと、その色の子として生まれます。\n\nごはんを選ぶこと。\n少しおでかけすること。\nきれいにしてあげること。\n夜には、そっと眠らせてあげること。\n\n正しい育て方はありません。\nあるのは、あなたが選んだことと、残る記録だけです。\n\nどうか、3日間よろしくね。`,
-        logDay:    day => `Day ${day}`,
-        logHeart:  v   => `ハートの最後: ${v}`,
-        logFood:   s   => `ごはん: ${s}`,
-        logOut:    s   => `おでかけ: ${s}`,
-        logStyle:  s   => `スタイル: ${s}`,
-        logClean:  s   => `そうじ: ${s}`,
-        logDrink:  n   => `ドリンク: ${n}回`,
-        logMacaron:n   => `マカロン: ${n}回`,
-        logEmpty:  "まだ記録がありません。"
+        smallNote:"状態は表情や動きで変わります",
+
+        statusHunger:"おなかがすいていそう",
+        statusTired:"少しつかれていそう",
+        statusDirty:"そろそろそうじしたいかも",
+        statusTogether:"いっしょにいる",
+
+        choiceQuestion:(a,b) => `${a} にする？ それとも ${b}？`,
+        foodChoiceLog:(s) => `ごはんで「${s}」を選んだ`,
+        outChoiceLog:(s) => `おでかけで「${s}」を選んだ`,
+        styleChoiceLog:(s) => `スタイルで「${s}」を選んだ`,
+        foodChoiceToast:(s) => `今日は「${s}」にしました。`,
+        otherChoiceToast:(s) => `「${s}」を選びました。`,
+
+        bornLog:(color) => `${color}の子が生まれた`,
+        letterLog:"手紙が届いた",
+        letterOpenLog:"手紙を読んだ",
+        sitterOnLog:"シッターをONにした",
+        sitterOffLog:(m) => `シッターをOFFにした（${m}分）`,
+
+        letterText:
+`見つけてくれたあなたへ
+
+この子は、マカロンの姿でやってきました。
+1分たつと、その色の子として生まれます。
+
+ごはんを選ぶこと。
+少しおでかけすること。
+きれいにしてあげること。
+夜には、そっと眠らせてあげること。
+
+正しい育て方はありません。
+あるのは、あなたが選んだことと、残る記
+記録だけです。
+
+どうか、3日間よろしくね。`,
+        logDay:(day) => `Day ${day}`,
+        logHeart:(v) => `ハートの最後: ${v}`,
+        logFood:(s) => `ごはん: ${s}`,
+        logOut:(s) => `おでかけ: ${s}`,
+        logStyle:(s) => `スタイル: ${s}`,
+        logClean:(s) => `そうじ: ${s}`,
+        logDrink:(n) => `ドリンク: ${n}回`,
+        logMacaron:(n) => `マカロン: ${n}回`,
+        logEmpty:"まだ記録がありません。"
       },
+
       en: {
-        brandTitle:"Care Game", dayLabel:"Day", sitter:"Sitter",
-        charCardTitle:"Character", charPreparing:"Preparing...",
-        commandTitle:"Commands", commandHint:"Food shows 20 pairs in sequence",
-        foodGroupTitle:"Food", playGroupTitle:"Play", careGroupTitle:"Care",
-        btnFoodLabel:"Food", btnFoodSub:"20 pairs",
-        btnOutLabel:"Go out", btnOutSub:"choices",
-        btnStyleLabel:"Style", btnStyleSub:"choices",
-        btnDrinkLabel:"Drink", btnDrinkSub:"small recovery",
-        btnCleanLabel:"Clean", btnCleanSub:"poop game",
-        btnMacaronLabel:"Macaron", btnMacaronSub:"small recovery",
-        btnName:"Set name", btnLogs:"📊 Logs", btnReset:"🔄 Reset",
+        brandTitle:"Care Game",
+        dayLabel:"Day",
+        sitter:"Sitter",
+        charCardTitle:"Character",
+        charPreparing:"Preparing...",
+        commandTitle:"Commands",
+        commandHint:"Food shows 20 pairs in sequence",
+        foodGroupTitle:"Food",
+        playGroupTitle:"Play",
+        careGroupTitle:"Care",
+
+        btnFoodLabel:"Food",
+        btnFoodSub:"20 pairs",
+        btnOutLabel:"Go out",
+        btnOutSub:"choices",
+        btnStyleLabel:"Style",
+        btnStyleSub:"choices",
+        btnDrinkLabel:"Drink",
+        btnDrinkSub:"small recovery",
+        btnCleanLabel:"Clean",
+        btnCleanSub:"poop game",
+        btnMacaronLabel:"Macaron",
+        btnMacaronSub:"small recovery",
+        btnName:"Set name",
+        btnLogs:"📊 Logs",
+        btnReset:"🔄 Reset",
+        letterBtn:"💌 Read the letter",
+
         surveyGateTitle:"Before the game",
         surveyGateDesc:"After answering the survey, return here from the link shown on the Google Form completion page.",
         btnGoSurvey:"Open survey",
-        letterBtn:"💌 Read the letter", letterTitle:"💌 Letter", letterClose:"Close letter",
-        logsTitle:"Three-day log", logsClose:"Close",
-        poopTitle:"Cleaning", poopHint:"Tap the poop to clean up", poopExit:"Finish",
-        choiceModalTitle:"Choice", choiceModalDesc:"Choose one",
-        choiceHintFood:"Each choice moves to the next pair.", choiceHintOther:"Your choice will be logged.",
+
+        letterTitle:"💌 Letter",
+        letterClose:"Close letter",
+
+        logsTitle:"Three-day log",
+        logsClose:"Close",
+
+        poopTitle:"Cleaning",
+        poopHint:"Tap the poop to clean up",
+        poopExit:"Finish",
+
+        choiceModalTitle:"Choice",
+        choiceModalDesc:"Choose one",
+        choiceHintFood:"Each choice moves to the next pair.",
+        choiceHintOther:"Your choice will be logged.",
         choiceClose:"Close",
-        thanks:"Thank you", thanksSub:"Only the quiet record of three days remains.",
-        endingLogs:"View logs", endingClose:"Close",
-        statusQuiet:"Quiet time", statusMacaron:"Macaron time",
-        statusSick:"Not feeling well", statusNight:"Night sleep", statusDay:"Together today",
+
+        thanks:"Thank you",
+        thanksSub:"Only the quiet record of three days remains.",
+        endingLogs:"View logs",
+        endingClose:"Close",
+
+        statusQuiet:"Quiet time",
+        statusMacaron:"Macaron time",
+        statusSick:"Not feeling well",
+        statusNight:"Night sleep",
+        statusDay:"Together today",
+
         preHatchBubble:"What kind of child will appear?",
-        preHatchSleep:"Hatching in", preHatchStatus:"The macaron is quietly waiting",
+        preHatchStatus:"The macaron is quietly waiting",
         preHatchGrowth:"The macaron will hatch in 1 minute",
+        preHatchSleep:(sec) => `Hatching in ${sec}s`,
+
         bornToast:"The macaron became a character of the same color.",
         letterToast:"A letter floated in.",
-        surveyToast:"Thank you for the survey. Starting the game.",
+        surveyToast:"Thanks for the survey. Starting the game.",
         drinkToast:"It seems a little more energetic.",
         macaronToast:"A sweet moment passed.",
         cleanToast:"It became clean.",
         growthToast:"It seems to have grown a little.",
+
         namePrompt:"Enter a name:",
-        nameToastPrefix:"Now it is \u201c", nameToastSuffix:"\u201d.",
+        nameToastPrefix:"Now it is “",
+        nameToastSuffix:"”.",
         resetConfirm:"Do you really want to reset?",
-        sickBubble:"sniff...", nightBubble:"zzz...", awakeBubble:"Hello",
-        sickSleep:"Looks unwell", nightSleep:"Sleeping because it is night", awakeSleep:"Awake",
+
+        sickBubble:"sniff...",
+        nightBubble:"zzz...",
+        awakeBubble:"Hello",
+
+        sickSleep:"Looks unwell",
+        nightSleep:"Sleeping because it is night",
+        awakeSleep:"Awake",
+
         growthNames:["Very small","A little bigger","Quite grown","Fully grown"],
         growthFormat:(count, label) => `${count} choices / ${label}`,
-        statusHunger:"Looks hungry", statusTired:"Looks a bit tired",
-        statusDirty:"May want cleaning soon", statusTogether:"Staying together",
-        remaining:"Remaining", hatchIn:"Hatching in",
-        choiceQuestion:(a, b) => `${a} or ${b}?`,
-        foodChoiceLog:  s => `Chose "${s}" for food`,
-        outChoiceLog:   s => `Chose "${s}" for outing`,
-        styleChoiceLog: s => `Chose "${s}" for style`,
-        foodChoiceToast:  s => `Today it chose "${s}".`,
-        otherChoiceToast: s => `Chose "${s}".`,
-        bornLog:    color => `A ${color} child was born`,
-        letterLog:  "A letter arrived", letterOpenLog: "Read the letter",
-        letterText: `To the one who found me,\n\nThis child arrived in the shape of a macaron.\nAfter one minute, it will be born in the same color.\n\nChoosing food.\nGoing out for a while.\nCleaning gently.\nLetting it sleep at night.\n\nThere is no single correct way to care for it.\nOnly your choices, and the traces they leave behind.\n\nPlease stay with it for three days.`,
-        logDay:    day => `Day ${day}`,
-        logHeart:  v   => `Heart at end: ${v}`,
-        logFood:   s   => `Food: ${s}`,
-        logOut:    s   => `Outing: ${s}`,
-        logStyle:  s   => `Style: ${s}`,
-        logClean:  s   => `Cleaning: ${s}`,
-        logDrink:  n   => `Drink: ${n} times`,
-        logMacaron:n   => `Macaron: ${n} times`,
-        logEmpty:  "No record yet."
+        smallNote:"Its state changes through expression and movement",
+
+        statusHunger:"Looks hungry",
+        statusTired:"Looks a bit tired",
+        statusDirty:"May want cleaning soon",
+        statusTogether:"Staying together",
+
+        choiceQuestion:(a,b) => `${a} or ${b}?`,
+        foodChoiceLog:(s) => `Chose "${s}" for food`,
+        outChoiceLog:(s) => `Chose "${s}" for outing`,
+        styleChoiceLog:(s) => `Chose "${s}" for style`,
+        foodChoiceToast:(s) => `Today it chose "${s}".`,
+        otherChoiceToast:(s) => `Chose "${s}".`,
+
+        bornLog:(color) => `A ${color} child was born`,
+        letterLog:"A letter arrived",
+        letterOpenLog:"Read the letter",
+        sitterOnLog:"Sitter turned on",
+        sitterOffLog:(m) => `Sitter turned off (${m} min)`,
+
+        letterText:
+`To the one who found me,
+
+This child arrived in the shape of a macaron.
+After one minute, it will be born in the same color.
+
+Choosing food.
+Going out for a while.
+Cleaning gently.
+Letting it sleep at night.
+
+There is no single correct way to care for it.
+Only your choices, and the traces they leave behind.
+
+Please stay with it for three days.`,
+        logDay:(day) => `Day ${day}`,
+        logHeart:(v) => `Heart at end: ${v}`,
+        logFood:(s) => `Food: ${s}`,
+        logOut:(s) => `Outing: ${s}`,
+        logStyle:(s) => `Style: ${s}`,
+        logClean:(s) => `Cleaning: ${s}`,
+        logDrink:(n) => `Drink: ${n} times`,
+        logMacaron:(n) => `Macaron: ${n} times`,
+        logEmpty:"No record yet."
       },
+
       zh: {
-        brandTitle:"照护游戏", dayLabel:"第", sitter:"代看",
-        charCardTitle:"角色", charPreparing:"准备中...",
-        commandTitle:"指令", commandHint:"食物会按顺序出现20组二选一",
-        foodGroupTitle:"食物", playGroupTitle:"玩耍", careGroupTitle:"照护",
-        btnFoodLabel:"食物", btnFoodSub:"20组二选一",
-        btnOutLabel:"外出", btnOutSub:"选择",
-        btnStyleLabel:"风格", btnStyleSub:"选择",
-        btnDrinkLabel:"饮料", btnDrinkSub:"稍微恢复",
-        btnCleanLabel:"清扫", btnCleanSub:"便便游戏",
-        btnMacaronLabel:"马卡龙", btnMacaronSub:"稍微恢复",
-        btnName:"取名字", btnLogs:"📊 日志", btnReset:"🔄 重置",
+        brandTitle:"照护游戏",
+        dayLabel:"第",
+        sitter:"代看",
+        charCardTitle:"角色",
+        charPreparing:"准备中...",
+        commandTitle:"指令",
+        commandHint:"食物会按顺序出现20组二选一",
+        foodGroupTitle:"食物",
+        playGroupTitle:"玩耍",
+        careGroupTitle:"照护",
+
+        btnFoodLabel:"食物",
+        btnFoodSub:"20组二选一",
+        btnOutLabel:"外出",
+        btnOutSub:"选择",
+        btnStyleLabel:"风格",
+        btnStyleSub:"选择",
+        btnDrinkLabel:"饮料",
+        btnDrinkSub:"稍微恢复",
+        btnCleanLabel:"清扫",
+        btnCleanSub:"便便游戏",
+        btnMacaronLabel:"马卡龙",
+        btnMacaronSub:"稍微恢复",
+        btnName:"取名字",
+        btnLogs:"📊 日志",
+        btnReset:"🔄 重置",
+        letterBtn:"💌 阅读来信",
+
         surveyGateTitle:"开始游戏前",
         surveyGateDesc:"完成问卷后，请从 Google 表单提交完成页面中的链接返回本游戏。",
         btnGoSurvey:"进入问卷",
-        letterBtn:"💌 阅读来信", letterTitle:"💌 来信", letterClose:"关闭来信",
-        logsTitle:"三天记录", logsClose:"关闭",
-        poopTitle:"清扫", poopHint:"点击便便把它清理干净", poopExit:"结束",
-        choiceModalTitle:"选择", choiceModalDesc:"请选择一个",
-        choiceHintFood:"每次选择后会进入下一组。", choiceHintOther:"你的选择会被记录。",
+
+        letterTitle:"💌 来信",
+        letterClose:"关闭来信",
+
+        logsTitle:"三天记录",
+        logsClose:"关闭",
+
+        poopTitle:"清扫",
+        poopHint:"点击便便把它清理干净",
+        poopExit:"结束",
+
+        choiceModalTitle:"选择",
+        choiceModalDesc:"请选择一个",
+        choiceHintFood:"每次选择后会进入下一组。",
+        choiceHintOther:"你的选择会被记录。",
         choiceClose:"关闭",
-        thanks:"谢谢", thanksSub:"留下的只有这三天安静的记录。",
-        endingLogs:"查看日志", endingClose:"关闭",
-        statusQuiet:"安静的时间", statusMacaron:"马卡龙时间",
-        statusSick:"看起来不太舒服", statusNight:"夜晚睡眠", statusDay:"今天也在一起",
+
+        thanks:"谢谢",
+        thanksSub:"留下的只有这三天安静的记录。",
+        endingLogs:"查看日志",
+        endingClose:"关闭",
+
+        statusQuiet:"安静的时间",
+        statusMacaron:"马卡龙时间",
+        statusSick:"看起来不太舒服",
+        statusNight:"夜晚睡眠",
+        statusDay:"今天也在一起",
+
         preHatchBubble:"会出现什么样的孩子呢？",
-        preHatchSleep:"孵化还有", preHatchStatus:"马卡龙正在安静等待",
+        preHatchStatus:"马卡龙正在安静等待",
         preHatchGrowth:"马卡龙会在1分钟后出生",
+        preHatchSleep:(sec) => `孵化还有 ${sec}s`,
+
         bornToast:"马卡龙变成了同色的孩子。",
         letterToast:"一封信轻轻飘来了。",
         surveyToast:"谢谢填写问卷。开始游戏。",
@@ -638,123 +1540,110 @@
         macaronToast:"一个甜甜的时刻过去了。",
         cleanToast:"变干净了。",
         growthToast:"看起来又长大了一点。",
+
         namePrompt:"请输入名字：",
-        nameToastPrefix:"现在它叫\u201c", nameToastSuffix:"\u201d。",
+        nameToastPrefix:"现在它叫“",
+        nameToastSuffix:"”。",
         resetConfirm:"确定要重置吗？",
-        sickBubble:"掉眼泪...", nightBubble:"呼呼...", awakeBubble:"你好",
-        sickSleep:"看起来不太舒服", nightSleep:"因为是夜晚，所以睡着了", awakeSleep:"醒着",
+
+        sickBubble:"掉眼泪...",
+        nightBubble:"呼呼...",
+        awakeBubble:"你好",
+
+        sickSleep:"看起来不太舒服",
+        nightSleep:"因为是夜晚，所以睡着了",
+        awakeSleep:"醒着",
+
         growthNames:["还很小","长大一点了","长大很多了","已经长大了"],
         growthFormat:(count, label) => `${count}次选择 / ${label}`,
-        statusHunger:"看起来有点饿", statusTired:"看起来有点累",
-        statusDirty:"可能快需要清扫了", statusTogether:"陪在一起",
-        remaining:"剩余", hatchIn:"孵化还有",
-        choiceQuestion:(a, b) => `选 ${a} 还是 ${b}？`,
-        foodChoiceLog:  s => `食物选择了"${s}"`,
-        outChoiceLog:   s => `外出选择了"${s}"`,
-        styleChoiceLog: s => `风格选择了"${s}"`,
-        foodChoiceToast:  s => `今天选择了"${s}"。`,
-        otherChoiceToast: s => `选择了"${s}"。`,
-        bornLog:    color => `${color}颜色的孩子出生了`,
-        letterLog:  "收到了一封信", letterOpenLog: "读了信",
-        letterText: `给发现我的你，\n\n这个孩子一开始以马卡龙的样子来到这里。\n过了一分钟，它会以相同的颜色出生。\n\n为它选择食物。\n和它稍微出去走走。\n轻轻把它打理干净。\n在夜里让它安静睡去。\n\n没有唯一正确的照顾方式。\n留下的只有你的选择，以及这些痕迹。\n\n请陪伴它三天。`,
-        logDay:    day => `第 ${day} 天`,
-        logHeart:  v   => `最后的爱心值: ${v}`,
-        logFood:   s   => `食物: ${s}`,
-        logOut:    s   => `外出: ${s}`,
-        logStyle:  s   => `风格: ${s}`,
-        logClean:  s   => `清扫: ${s}`,
-        logDrink:  n   => `饮料: ${n}次`,
-        logMacaron:n   => `马卡龙: ${n}次`,
-        logEmpty:  "还没有记录。"
+        smallNote:"状态会通过表情和动作变化",
+
+        statusHunger:"看起来有点饿",
+        statusTired:"看起来有点累",
+        statusDirty:"可能快需要清扫了",
+        statusTogether:"陪在一起",
+
+        choiceQuestion:(a,b) => `选 ${a} 还是 ${b}？`,
+        foodChoiceLog:(s) => `食物选择了“${s}”`,
+        outChoiceLog:(s) => `外出选择了“${s}”`,
+        styleChoiceLog:(s) => `风格选择了“${s}”`,
+        foodChoiceToast:(s) => `今天选择了“${s}”。`,
+        otherChoiceToast:(s) => `选择了“${s}”。`,
+
+        bornLog:(color) => `${color}颜色的孩子出生了`,
+        letterLog:"收到了一封信",
+        letterOpenLog:"读了信",
+        sitterOnLog:"开启了代看",
+        sitterOffLog:(m) => `关闭了代看（${m}分钟）`,
+
+        letterText:
+`给发现我的你，
+
+这个孩子一开始以马卡龙的样子来到这里。
+过了一分钟，它会以相同的颜色出生。
+
+为它选择食物。
+和它稍微出去走走。
+轻轻把它打理干净。
+在夜里让它安静睡去。
+
+没有唯一正确的照顾方式。
+留下的只有你的选择，以及这些痕迹。
+
+请陪伴它三天。`,
+        logDay:(day) => `第 ${day} 天`,
+        logHeart:(v) => `最后的爱心值: ${v}`,
+        logFood:(s) => `食物: ${s}`,
+        logOut:(s) => `外出: ${s}`,
+        logStyle:(s) => `风格: ${s}`,
+        logClean:(s) => `清扫: ${s}`,
+        logDrink:(n) => `饮料: ${n}次`,
+        logMacaron:(n) => `马卡龙: ${n}次`,
+        logEmpty:"还没有记录。"
       }
     };
 
-    const ui = {
-      langSel:        document.getElementById("langSel"),
-      brandTitle:     document.getElementById("brandTitle"),
-      dayLabel:       document.getElementById("dayLabel"),
-      dayNum:         document.getElementById("dayNum"),
-      statusText:     document.getElementById("statusText"),
-      countdownText:  document.getElementById("countdownText"),
-      heartFill:      document.getElementById("heartFill"),
-      heartVal:       document.getElementById("heartVal"),
-      sitterToggle:   document.getElementById("sitterToggle"),
-      sitterLabel:    document.getElementById("sitterLabel"),
-      charCardTitle:  document.getElementById("charCardTitle"),
-      charStatus:     document.getElementById("charStatus"),
-      entityImg:      document.getElementById("entityImg"),
-      entityBubble:   document.getElementById("entityBubble"),
-      entityVisual:   document.getElementById("entityVisual"),
-      sleepStatus:    document.getElementById("sleepStatus"),
-      growthNote:     document.getElementById("growthNote"),
-      commandTitle:   document.getElementById("commandTitle"),
-      commandHint:    document.getElementById("commandHint"),
-      foodGroupTitle: document.getElementById("foodGroupTitle"),
-      playGroupTitle: document.getElementById("playGroupTitle"),
-      careGroupTitle: document.getElementById("careGroupTitle"),
-      btnFood:        document.getElementById("btnFood"),
-      btnFoodLabel:   document.getElementById("btnFoodLabel"),
-      btnFoodSub:     document.getElementById("btnFoodSub"),
-      btnOut:         document.getElementById("btnOut"),
-      btnOutLabel:    document.getElementById("btnOutLabel"),
-      btnOutSub:      document.getElementById("btnOutSub"),
-      btnStyle:       document.getElementById("btnStyle"),
-      btnStyleLabel:  document.getElementById("btnStyleLabel"),
-      btnStyleSub:    document.getElementById("btnStyleSub"),
-      btnDrink:       document.getElementById("btnDrink"),
-      btnDrinkLabel:  document.getElementById("btnDrinkLabel"),
-      btnDrinkSub:    document.getElementById("btnDrinkSub"),
-      btnClean:       document.getElementById("btnClean"),
-      btnCleanLabel:  document.getElementById("btnCleanLabel"),
-      btnCleanSub:    document.getElementById("btnCleanSub"),
-      btnMacaron:     document.getElementById("btnMacaron"),
-      btnMacaronLabel:document.getElementById("btnMacaronLabel"),
-      btnMacaronSub:  document.getElementById("btnMacaronSub"),
-      btnName:        document.getElementById("btnName"),
-      btnLogs:        document.getElementById("btnLogs"),
-      btnReset:       document.getElementById("btnReset"),
-      surveyGate:     document.getElementById("surveyGate"),
-      surveyGateTitle:document.getElementById("surveyGateTitle"),
-      surveyGateDesc: document.getElementById("surveyGateDesc"),
-      btnGoSurvey:    document.getElementById("btnGoSurvey"),
-      choiceModal:    document.getElementById("choiceModal"),
-      choiceModalTitle:document.getElementById("choiceModalTitle"),
-      choiceModalDesc:document.getElementById("choiceModalDesc"),
-      choiceProgress: document.getElementById("choiceProgress"),
-      choiceQuestion: document.getElementById("choiceQuestion"),
-      choiceLeft:     document.getElementById("choiceLeft"),
-      choiceRight:    document.getElementById("choiceRight"),
-      btnChoiceClose: document.getElementById("btnChoiceClose"),
-      choiceHint:     document.getElementById("choiceHint"),
-      letterModal:    document.getElementById("letterModal"),
-      letterTitle:    document.getElementById("letterTitle"),
-      letterContent:  document.getElementById("letterContent"),
-      btnLetterClose: document.getElementById("btnLetterClose"),
-      btnLetter:      document.getElementById("btnLetter"),
-      logsModal:      document.getElementById("logsModal"),
-      logsTitle:      document.getElementById("logsTitle"),
-      logsContent:    document.getElementById("logsContent"),
-      btnLogsClose:   document.getElementById("btnLogsClose"),
-      poopGame:       document.getElementById("poopGame"),
-      poopTitle:      document.getElementById("poopTitle"),
-      poopGameArea:   document.getElementById("poopGameArea"),
-      poopScore:      document.getElementById("poopScore"),
-      poopHint:       document.getElementById("poopHint"),
-      btnPoopExit:    document.getElementById("btnPoopExit"),
-      endingScreen:   document.getElementById("endingScreen"),
-      thanksText:     document.getElementById("thanksText"),
-      thanksSub:      document.getElementById("thanksSub"),
-      btnEndingLogs:  document.getElementById("btnEndingLogs"),
-      btnEndingClose: document.getElementById("btnEndingClose"),
-      toast:          document.getElementById("toast")
+    const ASSETS = {
+      blue: {
+        macaron: ["./macaron_blue.png"],
+        open: ["./blue_open.png"],
+        closed: ["./blue_closed.png", "./blue_open.png"],
+        sleep: ["./blue_sleep.png", "./blue_open.png"]
+      },
+      green: {
+        macaron: ["./macaron_green.png"],
+        open: ["./green_open.png"],
+        closed: ["./green_closed.png", "./green_open.png"],
+        sleep: ["./green_sleep.png", "./green_open.png"]
+      },
+      pink: {
+        macaron: ["./macaron_pink.png"],
+        open: ["./pink_open.png"],
+        closed: ["./pink_closed.png", "./pink_open.png"],
+        sleep: ["./pink_sleep.png", "./pink_open.png"]
+      },
+      purple: {
+        macaron: ["./macaron_purple.png"],
+        open: ["./purple_open.png"],
+        closed: ["./purple_closed.png", "./purple_open.png"],
+        sleep: ["./purple_sleep.png", "./purple_sleep .png", "./purple_open.png"]
+      }
     };
 
-    let poopGameState      = { count: 0, target: POOP_COUNT_TARGET };
     let currentChoiceContext = null;
+    let poopGameState = { count: 0, target: POOP_COUNT_TARGET };
 
-    function getLang()     { return localStorage.getItem(LANG_KEY) || "ja"; }
-    function setLang(lang) { localStorage.setItem(LANG_KEY, lang); }
-    function T(key)        { return TXT[getLang()][key]; }
+    function getLang() {
+      return localStorage.getItem(LANG_KEY) || "ja";
+    }
+
+    function setLang(lang) {
+      localStorage.setItem(LANG_KEY, lang);
+    }
+
+    function T(key) {
+      return TXT[getLang()][key];
+    }
 
     function pickText(v) {
       if (typeof v === "string") return v;
@@ -762,104 +1651,163 @@
       return "";
     }
 
-    function formatDuration(ms) {
-      const total = Math.max(0, Math.floor(ms / 1000));
-      const d = Math.floor(total / 86400);
-      const h = Math.floor((total % 86400) / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      const s = total % 60;
-      return `${d}d ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    function now() {
+      return Date.now();
+    }
+
+    function clamp(v, min, max) {
+      return Math.min(max, Math.max(min, v));
+    }
+
+    function round1(v) {
+      return Math.round(v * 10) / 10;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
     }
 
     function createNewSave() {
       return {
-        v: 5, createdAt: new Date().toISOString(),
-        ended: false, endedAt: null,
-        hatched: false, letterArrived: false, letterOpened: false, letterAutoOpened: false,
-        name: "???", colorId: Math.floor(Math.random() * COLORS.length),
-        heart: 5, hunger: 2, tired: 1, dirty: 1, mood: 0,
-        day: 1, actionCount: 0,
+        v: 6,
+        createdAt: new Date().toISOString(),
+        ended: false,
+        endedAt: null,
+
+        hatched: false,
+        letterArrived: false,
+        letterOpened: false,
+        letterAutoOpened: false,
+
+        name: "???",
+        colorId: Math.floor(Math.random() * COLORS.length),
+
+        heart: 5,
+        hunger: 2,
+        tired: 1,
+        dirty: 1,
+        mood: 0,
+
+        day: 1,
+        actionCount: 0,
         cursors: { food: 0, out: 0, style: 0 },
-        choices: {}, events: [],
+
+        choices: {},
+        events: [],
         heartHistory: [{ t: 0, v: 5 }],
-        pauseAccumMs: 0, pausedSince: null,
-        lastCheckedAt: Date.now(), sitterUsedMs: 0, imageSig: ""
+
+        pauseAccumMs: 0,
+        pausedSince: null,
+        sitterUsedMs: 0,
+        lastCheckedAt: now()
       };
     }
 
     function loadSave() {
-      try { const raw = localStorage.getItem(SAVE_KEY); return raw ? JSON.parse(raw) : null; }
-      catch(_) { return null; }
-    }
-    function saveSave(save) {
-      try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(_) {}
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        return null;
+      }
     }
 
-    function now()         { return Date.now(); }
-    function round1(v)     { return Math.round(v * 10) / 10; }
-    function clamp(v,a,b)  { return Math.min(b, Math.max(a, v)); }
+    function saveSave(save) {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+    }
 
     function calcElapsedMs(save, atNow = now()) {
-      const created      = new Date(save.createdAt).getTime();
+      const created = new Date(save.createdAt).getTime();
       const currentPause = save.pausedSince ? (atNow - save.pausedSince) : 0;
       return Math.max(0, atNow - created - (save.pauseAccumMs || 0) - currentPause);
+    }
+
+    function pushLiveLog(save, text) {
+      save.events.push({
+        t: new Date().toISOString(),
+        day: save.day,
+        text
+      });
+    }
+
+    function addChoice(save, category, text) {
+      const key = `day${save.day}_${category}`;
+      if (!save.choices[key]) save.choices[key] = [];
+      save.choices[key].push(text);
+    }
+
+    function recordHeart(save) {
+      const elapsed = calcElapsedMs(save);
+      const last = save.heartHistory[save.heartHistory.length - 1];
+      if (!last || last.v !== round1(save.heart)) {
+        save.heartHistory.push({ t: elapsed, v: round1(save.heart) });
+      }
     }
 
     function isSurveyDone() {
       return localStorage.getItem(GIFT_SURVEY_DONE_KEY) === "1" ||
              localStorage.getItem(OSEWA_SURVEY_DONE_KEY) === "1";
     }
-    function markSurveyDone() {
-      const iso = new Date().toISOString();
-      localStorage.setItem(GIFT_SURVEY_DONE_KEY,  "1");
-      localStorage.setItem(GIFT_SURVEY_DONE_AT,   iso);
-      localStorage.setItem(OSEWA_SURVEY_DONE_KEY, "1");
-      localStorage.setItem(OSEWA_SURVEY_DONE_AT,  iso);
-    }
+
     function handleSurveyReturn() {
       const url = new URL(location.href);
       if (url.searchParams.get("survey") === "done") {
-        markSurveyDone();
+        localStorage.setItem(GIFT_SURVEY_DONE_KEY, "1");
+        localStorage.setItem(OSEWA_SURVEY_DONE_KEY, "1");
         url.searchParams.delete("survey");
         history.replaceState({}, "", url.toString());
         showToast(T("surveyToast"));
       }
     }
-    function openSurveyPage() { location.href = "./survey.html"; }
+
+    function openSurveyPage() {
+      location.href = "./survey.html";
+    }
 
     function showToast(message) {
       ui.toast.textContent = message;
       ui.toast.classList.add("show");
       clearTimeout(showToast.timer);
-      showToast.timer = setTimeout(() => ui.toast.classList.remove("show"), 2200);
+      showToast.timer = setTimeout(() => {
+        ui.toast.classList.remove("show");
+      }, 2200);
     }
 
-    function pushLiveLog(save, text) {
-      save.events.push({ t: new Date().toISOString(), day: save.day, text });
-    }
-    function addChoice(save, category, text) {
-      const key = `day${save.day}_${category}`;
-      if (!save.choices[key]) save.choices[key] = [];
-      save.choices[key].push(text);
-    }
-    function recordHeart(save) {
-      const elapsed = calcElapsedMs(save);
-      const last = save.heartHistory[save.heartHistory.length - 1];
-      if (!last || last.v !== round1(save.heart)) save.heartHistory.push({ t: elapsed, v: round1(save.heart) });
+    function getColorName(save) {
+      return COLORS[save.colorId % COLORS.length];
     }
 
-    function getGrowthStage(save) { return Math.min(3, Math.floor((save.actionCount || 0) / 10)); }
-    function getGrowthScale(save) { return [0.88, 1.00, 1.10, 1.20][getGrowthStage(save)]; }
-    function getColorName(save)   { return COLORS[save.colorId % COLORS.length]; }
-    function isNightTime()        { const h = new Date().getHours(); return h >= 21 || h < 6; }
-    function isSick(save)         { return save.hunger >= 7.8 || save.dirty >= 7.2 || save.tired >= 8.2 || save.heart <= 2.4; }
-    function getAssetSet(save)    { return ASSETS[getColorName(save)] || ASSETS.blue; }
+    function getAssetSet(save) {
+      return ASSETS[getColorName(save)] || ASSETS.blue;
+    }
+
+    function getGrowthStage(save) {
+      return Math.min(3, Math.floor((save.actionCount || 0) / 10));
+    }
+
+    function getGrowthScale(save) {
+      return [0.88, 1.0, 1.1, 1.2][getGrowthStage(save)];
+    }
+
+    function isNightTime() {
+      const h = new Date().getHours();
+      return h >= 21 || h < 6;
+    }
+
+    function isSick(save) {
+      return save.hunger >= 7.8 || save.dirty >= 7.2 || save.tired >= 8.2 || save.heart <= 2.4;
+    }
 
     function getImageCandidates(save) {
       const assets = getAssetSet(save);
-      if (!save.hatched)   return assets.macaron;
-      if (isNightTime())   return assets.sleep;
-      if (isSick(save))    return assets.closed;
+      if (!save.hatched) return assets.macaron;
+      if (isNightTime()) return assets.sleep;
+      if (isSick(save)) return assets.closed;
       return assets.open;
     }
 
@@ -867,63 +1815,99 @@
       const sig = candidates.join("|");
       if (ui.entityImg.dataset.sig === sig) return;
       ui.entityImg.dataset.sig = sig;
-      let idx = 0;
-      const tryNext = () => { if (idx < candidates.length) ui.entityImg.src = candidates[idx]; };
-      ui.entityImg.onerror = () => { idx++; tryNext(); };
+
+      let index = 0;
+
+      function tryNext() {
+        if (index >= candidates.length) {
+          ui.entityImg.style.display = "none";
+          ui.imageFallback.style.display = "flex";
+          return;
+        }
+        ui.entityImg.src = candidates[index];
+      }
+
+      ui.entityImg.onload = () => {
+        ui.imageFallback.style.display = "none";
+        ui.entityImg.style.display = "block";
+      };
+
+      ui.entityImg.onerror = () => {
+        index += 1;
+        tryNext();
+      };
+
       tryNext();
+    }
+
+    function applyBackground() {
+      const root = document.documentElement;
+      root.style.setProperty("--bg-image", 'url("./space_background.png")');
+    }
+
+    function updateHeartDisplay(save) {
+      const pct = clamp(save.heart / 10 * 100, 0, 100);
+      ui.heartFill.style.width = `${pct}%`;
+      ui.heartVal.textContent = `${round1(save.heart)}/10`;
+      recordHeart(save);
+    }
+
+    function updateStatusPill(save) {
+      if (save.ended) {
+        ui.statusText.textContent = T("thanks");
+        return;
+      }
+      if (!save.hatched) {
+        ui.statusText.textContent = T("statusMacaron");
+        return;
+      }
+      if (isNightTime()) {
+        ui.statusText.textContent = T("statusNight");
+        return;
+      }
+      if (isSick(save)) {
+        ui.statusText.textContent = T("statusSick");
+        return;
+      }
+      ui.statusText.textContent = T("statusDay");
     }
 
     function updateEntityDisplay(save) {
       setEntityImage(getImageCandidates(save));
       ui.entityVisual.style.transform = `scale(${save.hatched ? getGrowthScale(save) : 0.92})`;
       ui.entityVisual.classList.toggle("crying", save.hatched && isSick(save) && !isNightTime());
+
       if (!save.hatched) {
+        const remainSec = Math.max(0, Math.ceil((HATCH_MS - calcElapsedMs(save)) / 1000));
         ui.entityBubble.textContent = T("preHatchBubble");
-        const remain = Math.max(0, HATCH_MS - calcElapsedMs(save));
-        ui.sleepStatus.textContent  = `${T("preHatchSleep")} ${Math.ceil(remain / 1000)}s`;
-        ui.charStatus.textContent   = T("preHatchStatus");
-        ui.growthNote.textContent   = save.letterArrived ? T("letterBtn") : T("preHatchGrowth");
+        ui.sleepStatus.textContent = T("preHatchSleep")(remainSec);
+        ui.growthNote.textContent = T("preHatchGrowth");
+        ui.charStatus.textContent = T("preHatchStatus");
+        ui.smallNote.textContent = T("smallNote");
         return;
       }
+
       const growthLabel = T("growthNames")[getGrowthStage(save)];
       ui.growthNote.textContent = T("growthFormat")(save.actionCount, growthLabel);
+      ui.smallNote.textContent = T("smallNote");
+
       if (isNightTime()) {
         ui.entityBubble.textContent = T("nightBubble");
-        ui.sleepStatus.textContent  = T("nightSleep");
+        ui.sleepStatus.textContent = T("nightSleep");
       } else if (isSick(save)) {
         ui.entityBubble.textContent = T("sickBubble");
-        ui.sleepStatus.textContent  = T("sickSleep");
+        ui.sleepStatus.textContent = T("sickSleep");
       } else {
         ui.entityBubble.textContent = save.name === "???" ? T("awakeBubble") : save.name;
-        ui.sleepStatus.textContent  = T("awakeSleep");
+        ui.sleepStatus.textContent = T("awakeSleep");
       }
-      const texts = [];
-      if (save.hunger > 7) texts.push(T("statusHunger"));
-      if (save.tired  > 7) texts.push(T("statusTired"));
-      if (save.dirty  > 6) texts.push(T("statusDirty"));
-      if (!texts.length)   texts.push(T("statusTogether"));
-      ui.charStatus.textContent = texts.join(" / ");
-    }
 
-    function updateStatusPill(save) {
-      if (save.ended)       { ui.statusText.textContent = T("thanks");       return; }
-      if (!save.hatched)    { ui.statusText.textContent = T("statusMacaron");return; }
-      if (isNightTime())    { ui.statusText.textContent = T("statusNight");  return; }
-      if (isSick(save))     { ui.statusText.textContent = T("statusSick");   return; }
-      ui.statusText.textContent = T("statusDay");
-    }
-
-    function updateCountdown(save) {
-      const elapsed = calcElapsedMs(save);
-      const remain  = Math.max(0, DAY_MS * TOTAL_DAYS - elapsed);
-      ui.countdownText.textContent = `${T("remaining")} ${formatDuration(remain)}`;
-    }
-
-    function updateHeartDisplay(save) {
-      const pct = Math.max(0, Math.min(100, save.heart / 10 * 100));
-      ui.heartFill.style.width = pct + "%";
-      ui.heartVal.textContent  = `${round1(save.heart)}/10`;
-      recordHeart(save);
+      const statusLines = [];
+      if (save.hunger > 7) statusLines.push(T("statusHunger"));
+      if (save.tired > 7) statusLines.push(T("statusTired"));
+      if (save.dirty > 6) statusLines.push(T("statusDirty"));
+      if (!statusLines.length) statusLines.push(T("statusTogether"));
+      ui.charStatus.textContent = statusLines.join(" / ");
     }
 
     function maybeDeliverLetter(save, elapsed) {
@@ -932,9 +1916,11 @@
         pushLiveLog(save, T("letterLog"));
         showToast(T("letterToast"));
       }
+
       ui.btnLetter.style.visibility = save.letterArrived ? "visible" : "hidden";
-      ui.btnLetter.disabled         = !save.letterArrived;
+      ui.btnLetter.disabled = !save.letterArrived;
       ui.btnLetter.classList.toggle("letterArrival", save.letterArrived && !save.letterOpened);
+
       if (save.letterArrived && !save.letterAutoOpened) {
         save.letterAutoOpened = true;
         openLetter(true);
@@ -961,7 +1947,7 @@
     function maybeEnd(save, elapsed) {
       if (save.ended) return;
       if (elapsed >= DAY_MS * TOTAL_DAYS) {
-        save.ended   = true;
+        save.ended = true;
         save.endedAt = new Date().toISOString();
         pushLiveLog(save, T("thanks"));
         saveSave(save);
@@ -969,172 +1955,221 @@
       }
     }
 
-    function showEnding() { ui.endingScreen.classList.add("show"); }
-    function hideEnding() { ui.endingScreen.classList.remove("show"); }
+    function showEnding() {
+      ui.endingScreen.classList.add("show");
+    }
+
+    function hideEnding() {
+      ui.endingScreen.classList.remove("show");
+    }
 
     function simulateNeeds(save) {
       if (save.pausedSince || save.ended) return;
-      const nowMs = now();
-      const last  = save.lastCheckedAt || nowMs;
-      const dt    = Math.max(0, nowMs - last) / 1000;
+
+      const current = now();
+      const last = save.lastCheckedAt || current;
+      const dt = Math.max(0, current - last) / 1000;
       if (!dt) return;
-      save.hunger = clamp(save.hunger + dt * 0.0009,  0, 10);
-      save.tired  = clamp(save.tired  + dt * 0.0007,  0, 10);
-      save.dirty  = clamp(save.dirty  + dt * 0.00055, 0, 10);
-      save.heart  = clamp(save.heart  - dt * 0.00022, 0, 10);
-      save.lastCheckedAt = nowMs;
+
+      save.hunger = clamp(save.hunger + dt * 0.0009, 0, 10);
+      save.tired = clamp(save.tired + dt * 0.0007, 0, 10);
+      save.dirty = clamp(save.dirty + dt * 0.00055, 0, 10);
+      save.heart = clamp(save.heart - dt * 0.00022, 0, 10);
+      save.lastCheckedAt = current;
     }
 
     function touchAction(save) {
-      save.actionCount++;
+      save.actionCount += 1;
       save.lastCheckedAt = now();
-      if (save.actionCount > 0 && save.actionCount % 10 === 0) showToast(T("growthToast"));
+      if (save.actionCount > 0 && save.actionCount % 10 === 0) {
+        showToast(T("growthToast"));
+      }
     }
 
     function hiddenDelta(kind, index, side) {
       const seed = ((index + 1) * (side + 2) + kind.length) % 5;
+
       if (kind === "food") {
         return [
-          { heart: 0.6, hunger: -1.6, tired:  0.1  },
-          { heart: 0.4, hunger: -1.3, dirty:  0.06 },
+          { heart: 0.6, hunger: -1.6, tired: 0.1 },
+          { heart: 0.4, hunger: -1.3, dirty: 0.06 },
           { heart: 0.8, hunger: -1.4, tired: -0.08 },
-          { heart: 0.3, hunger: -1.8, dirty:  0.1  },
-          { heart: 0.5, hunger: -1.2, mood:   0.25 }
+          { heart: 0.3, hunger: -1.8, dirty: 0.1 },
+          { heart: 0.5, hunger: -1.2, mood: 0.25 }
         ][seed];
       }
+
       if (kind === "out") {
         return [
-          { heart: 0.7,  tired:  0.35, hunger: 0.25 },
+          { heart: 0.7, tired: 0.35, hunger: 0.25 },
           { heart: 0.35, tired: -0.45, hunger: 0.06 },
-          { heart: 0.55, tired:  0.1,  dirty:  0.25 },
-          { heart: 0.45, tired: -0.12, mood:   0.35 },
-          { heart: 0.5,  hunger: 0.12, mood:   0.18 }
+          { heart: 0.55, tired: 0.1, dirty: 0.25 },
+          { heart: 0.45, tired: -0.12, mood: 0.35 },
+          { heart: 0.5, hunger: 0.12, mood: 0.18 }
         ][seed];
       }
+
       return [
-        { heart: 0.65, mood: 0.45  },
-        { heart: 0.4,  mood: 0.22  },
+        { heart: 0.65, mood: 0.45 },
+        { heart: 0.4, mood: 0.22 },
         { heart: 0.55, tired: -0.12 },
-        { heart: 0.3,  dirty: -0.06 },
-        { heart: 0.48, mood: 0.28  }
+        { heart: 0.3, dirty: -0.06 },
+        { heart: 0.48, mood: 0.28 }
       ][seed];
     }
 
     function applyDelta(save, delta) {
-      save.heart  = clamp(save.heart  + (delta.heart  || 0), 0, 10);
+      save.heart = clamp(save.heart + (delta.heart || 0), 0, 10);
       save.hunger = clamp(save.hunger + (delta.hunger || 0), 0, 10);
-      save.tired  = clamp(save.tired  + (delta.tired  || 0), 0, 10);
-      save.dirty  = clamp(save.dirty  + (delta.dirty  || 0), 0, 10);
-      save.mood   = clamp(save.mood   + (delta.mood   || 0), -10, 10);
+      save.tired = clamp(save.tired + (delta.tired || 0), 0, 10);
+      save.dirty = clamp(save.dirty + (delta.dirty || 0), 0, 10);
+      save.mood = clamp(save.mood + (delta.mood || 0), -10, 10);
     }
 
     function openChoiceModal(kind) {
       const save = loadSave();
       if (!save || save.ended || !save.hatched) return;
+
       const lists = { food: FOOD_CHOICES, out: OUT_CHOICES, style: STYLE_CHOICES };
       const labelKeys = { food: "btnFoodLabel", out: "btnOutLabel", style: "btnStyleLabel" };
-      const subKeys   = { food: "btnFoodSub",   out: "btnOutSub",   style: "btnStyleSub"   };
-      const list    = lists[kind];
-      const index   = save.cursors[kind] % list.length;
-      const pair    = list[index];
+      const subKeys = { food: "btnFoodSub", out: "btnOutSub", style: "btnStyleSub" };
+
+      const list = lists[kind];
+      const index = save.cursors[kind] % list.length;
+      const pair = list[index];
+
       currentChoiceContext = { kind, cursorKey: kind, list, index, pair };
+
       ui.choiceModalTitle.textContent = T(labelKeys[kind]);
-      ui.choiceModalDesc.textContent  = T(subKeys[kind]);
-      ui.choiceProgress.textContent   = `${index + 1} / ${list.length}`;
-      ui.choiceQuestion.textContent   = T("choiceQuestion")(pickText(pair[0]), pickText(pair[1]));
-      ui.choiceLeft.textContent       = pickText(pair[0]);
-      ui.choiceRight.textContent      = pickText(pair[1]);
-      ui.choiceHint.textContent       = kind === "food" ? T("choiceHintFood") : T("choiceHintOther");
+      ui.choiceModalDesc.textContent = T(subKeys[kind]);
+      ui.choiceProgress.textContent = `${index + 1} / ${list.length}`;
+      ui.choiceQuestion.textContent = T("choiceQuestion")(pickText(pair[0]), pickText(pair[1]));
+      ui.choiceLeft.textContent = pickText(pair[0]);
+      ui.choiceRight.textContent = pickText(pair[1]);
+      ui.choiceHint.textContent = kind === "food" ? T("choiceHintFood") : T("choiceHintOther");
       ui.choiceModal.classList.add("show");
     }
 
-    function closeChoiceModal() { ui.choiceModal.classList.remove("show"); currentChoiceContext = null; }
+    function closeChoiceModal() {
+      ui.choiceModal.classList.remove("show");
+      currentChoiceContext = null;
+    }
 
     function selectCurrentChoice(side) {
       if (!currentChoiceContext) return;
+
       const save = loadSave();
       if (!save || save.ended) return;
+
       const { kind, cursorKey, index, pair } = currentChoiceContext;
-      const selected     = pair[side];
+      const selected = pair[side];
       const selectedText = pickText(selected);
+
       applyDelta(save, hiddenDelta(kind, index, side));
-      save.cursors[cursorKey]++;
+      save.cursors[cursorKey] += 1;
       touchAction(save);
+
       const label = `${pickText(pair[0])} / ${pickText(pair[1])} → ${selectedText}`;
-      const logFns  = { food: "foodChoiceLog", out: "outChoiceLog", style: "styleChoiceLog" };
+      const logFns = { food: "foodChoiceLog", out: "outChoiceLog", style: "styleChoiceLog" };
       const toastFn = kind === "food" ? "foodChoiceToast" : "otherChoiceToast";
-      const catMap  = { food: "Food", out: "Out", style: "Style" };
+      const catMap = { food: "Food", out: "Out", style: "Style" };
+
       pushLiveLog(save, T(logFns[kind])(selectedText));
       addChoice(save, catMap[kind], label);
-      showToast(T(toastFn)(selectedText));
+
       saveSave(save);
       closeChoiceModal();
+      showToast(T(toastFn)(selectedText));
       render();
     }
 
     function actDrink() {
       const save = loadSave();
       if (!save || save.ended || !save.hatched) return;
+
       save.heart = clamp(save.heart + 0.9, 0, 10);
       save.tired = clamp(save.tired - 0.9, 0, 10);
       pushLiveLog(save, T("btnDrinkLabel"));
       addChoice(save, "Drink", "Drink");
-      touchAction(save); saveSave(save);
-      showToast(T("drinkToast")); render();
+      touchAction(save);
+
+      saveSave(save);
+      showToast(T("drinkToast"));
+      render();
     }
 
     function actMacaron() {
       const save = loadSave();
       if (!save || save.ended || !save.hatched) return;
-      save.heart  = clamp(save.heart  + 1.1, 0, 10);
+
+      save.heart = clamp(save.heart + 1.1, 0, 10);
       save.hunger = clamp(save.hunger - 0.6, 0, 10);
       pushLiveLog(save, T("btnMacaronLabel"));
       addChoice(save, "Macaron", "Give");
-      touchAction(save); saveSave(save);
-      showToast(T("macaronToast")); render();
+      touchAction(save);
+
+      saveSave(save);
+      showToast(T("macaronToast"));
+      render();
+    }
+
+    function updatePoopScore() {
+      ui.poopScore.textContent = `${poopGameState.count} / ${poopGameState.target}`;
+    }
+
+    function spawnPoops() {
+      const area = ui.poopGameArea;
+      const w = area.clientWidth;
+      const h = area.clientHeight;
+
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          if (!ui.poopGame.classList.contains("show")) return;
+          if (poopGameState.count >= poopGameState.target) return;
+
+          const poop = document.createElement("div");
+          poop.className = "poop";
+          poop.textContent = "💩";
+          poop.style.left = `${Math.random() * (w - 44)}px`;
+          poop.style.top = `${Math.random() * (h - 44)}px`;
+
+          poop.addEventListener("click", () => {
+            poopGameState.count += 1;
+            updatePoopScore();
+            poop.remove();
+
+            if (poopGameState.count >= poopGameState.target) {
+              setTimeout(endPoopGame, 250);
+            } else {
+              setTimeout(spawnPoops, 260);
+            }
+          }, { once: true });
+
+          area.appendChild(poop);
+        }, i * 240);
+      }
     }
 
     function startPoopGame() {
       const save = loadSave();
       if (!save || save.ended || !save.hatched) return;
+
       ui.poopGame.classList.add("show");
-      poopGameState = { count: 0, target: POOP_COUNT_TARGET };
       ui.poopGameArea.innerHTML = "";
+      poopGameState = { count: 0, target: POOP_COUNT_TARGET };
       updatePoopScore();
       spawnPoops();
     }
 
-    function spawnPoops() {
-      const area = ui.poopGameArea;
-      const w = area.clientWidth, h = area.clientHeight;
-      for (let i = 0; i < 3; i++) {
-        setTimeout(() => {
-          if (!ui.poopGame.classList.contains("show") || poopGameState.count >= poopGameState.target) return;
-          const poop = document.createElement("div");
-          poop.className   = "poop";
-          poop.textContent = "💩";
-          poop.style.left  = Math.random() * (w - 42) + "px";
-          poop.style.top   = Math.random() * (h - 42) + "px";
-          poop.addEventListener("click", () => {
-            poopGameState.count++;
-            updatePoopScore();
-            poop.remove();
-            if (poopGameState.count >= poopGameState.target) setTimeout(endPoopGame, 250);
-            else setTimeout(spawnPoops, 260);
-          }, { once: true });
-          area.appendChild(poop);
-        }, i * 260);
-      }
-    }
-
-    function updatePoopScore() { ui.poopScore.textContent = `${poopGameState.count} / ${poopGameState.target}`; }
-
     function endPoopGame() {
       if (!ui.poopGame.classList.contains("show")) return;
+
       ui.poopGame.classList.remove("show");
       ui.poopGameArea.innerHTML = "";
+
       const save = loadSave();
       if (!save || save.ended) return;
+
       if (poopGameState.count > 0) {
         save.dirty = clamp(save.dirty - 2.2, 0, 10);
         save.heart = clamp(save.heart + 0.6, 0, 10);
@@ -1147,56 +2182,24 @@
       }
     }
 
-    function openLetter(fromAuto = false) {
+    function openLetter() {
       const save = loadSave();
       if (!save || !save.letterArrived) return;
+
       ui.letterContent.textContent = T("letterText");
       ui.letterModal.classList.add("show");
+
       if (!save.letterOpened) {
         save.letterOpened = true;
         pushLiveLog(save, T("letterOpenLog"));
         saveSave(save);
       }
+
       ui.btnLetter.classList.remove("letterArrival");
     }
-    function closeLetter() { ui.letterModal.classList.remove("show"); }
 
-    function openLogs() {
-      const save = loadSave();
-      if (!save) return;
-      const groups = buildDayLogs(save);
-      ui.logsContent.innerHTML = groups.map(g => `
-        <div class="logDay">
-          <h3>${escapeHtml(T("logDay")(g.day))}</h3>
-          <ul>${g.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        </div>`).join("");
-      ui.logsModal.classList.add("show");
-    }
-    function closeLogs() { ui.logsModal.classList.remove("show"); }
-
-    function buildDayLogs(save) {
-      const result = [];
-      for (let day = 1; day <= TOTAL_DAYS; day++) {
-        const items = [];
-        const food    = save.choices[`day${day}_Food`]    || [];
-        const out     = save.choices[`day${day}_Out`]     || [];
-        const style   = save.choices[`day${day}_Style`]   || [];
-        const clean   = save.choices[`day${day}_Clean`]   || [];
-        const drink   = save.choices[`day${day}_Drink`]   || [];
-        const macaron = save.choices[`day${day}_Macaron`] || [];
-        const dayEvts = (save.events || []).filter(e => e.day === day).map(e => e.text);
-        items.push(T("logHeart")(round1(getDayHeart(save, day))));
-        if (food.length)    items.push(T("logFood")(food.join(" / ")));
-        if (out.length)     items.push(T("logOut")(out.join(" / ")));
-        if (style.length)   items.push(T("logStyle")(style.join(" / ")));
-        if (clean.length)   items.push(T("logClean")(clean.join(" / ")));
-        if (drink.length)   items.push(T("logDrink")(drink.length));
-        if (macaron.length) items.push(T("logMacaron")(macaron.length));
-        if (dayEvts.length) items.push(...dayEvts);
-        if (!items.length)  items.push(T("logEmpty"));
-        result.push({ day, items });
-      }
-      return result;
+    function closeLetter() {
+      ui.letterModal.classList.remove("show");
     }
 
     function getDayHeart(save, day) {
@@ -1205,39 +2208,85 @@
       return cands.length ? cands[cands.length - 1].v : save.heart;
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&",  "&amp;")
-        .replaceAll("<",  "&lt;")
-        .replaceAll(">",  "&gt;")
-        .replaceAll('"',  "&quot;")
-        .replaceAll("'",  "&#39;");
+    function buildDayLogs(save) {
+      const result = [];
+
+      for (let day = 1; day <= TOTAL_DAYS; day++) {
+        const items = [];
+        const food = save.choices[`day${day}_Food`] || [];
+        const out = save.choices[`day${day}_Out`] || [];
+        const style = save.choices[`day${day}_Style`] || [];
+        const clean = save.choices[`day${day}_Clean`] || [];
+        const drink = save.choices[`day${day}_Drink`] || [];
+        const macaron = save.choices[`day${day}_Macaron`] || [];
+        const dayEvts = (save.events || []).filter(e => e.day === day).map(e => e.text);
+
+        items.push(T("logHeart")(round1(getDayHeart(save, day))));
+        if (food.length) items.push(T("logFood")(food.join(" / ")));
+        if (out.length) items.push(T("logOut")(out.join(" / ")));
+        if (style.length) items.push(T("logStyle")(style.join(" / ")));
+        if (clean.length) items.push(T("logClean")(clean.join(" / ")));
+        if (drink.length) items.push(T("logDrink")(drink.length));
+        if (macaron.length) items.push(T("logMacaron")(macaron.length));
+        if (dayEvts.length) items.push(...dayEvts);
+        if (!items.length) items.push(T("logEmpty"));
+
+        result.push({ day, items });
+      }
+
+      return result;
+    }
+
+    function openLogs() {
+      const save = loadSave();
+      if (!save) return;
+
+      const groups = buildDayLogs(save);
+      ui.logsContent.innerHTML = groups.map(g => `
+        <div class="logDay">
+          <h3>${escapeHtml(T("logDay")(g.day))}</h3>
+          <ul>${g.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+      `).join("");
+
+      ui.logsModal.classList.add("show");
+    }
+
+    function closeLogs() {
+      ui.logsModal.classList.remove("show");
     }
 
     function toggleSitter() {
       const save = loadSave();
       if (!save || save.ended) return;
+
       if (!save.pausedSince) {
         save.pausedSince = now();
-        pushLiveLog(save, T("sitter"));
+        pushLiveLog(save, T("sitterOnLog"));
       } else {
         const paused = now() - save.pausedSince;
-        save.pauseAccumMs  += paused;
-        save.sitterUsedMs  += paused;
-        save.pausedSince    = null;
-        save.lastCheckedAt  = now();
+        save.pauseAccumMs += paused;
+        save.sitterUsedMs += paused;
+        save.pausedSince = null;
+        save.lastCheckedAt = now();
+        pushLiveLog(save, T("sitterOffLog")(Math.max(1, Math.round(paused / 60000))));
       }
-      saveSave(save); render();
+
+      saveSave(save);
+      render();
     }
 
     function changeName() {
       const save = loadSave();
       if (!save || save.ended) return;
+
       const newName = prompt(T("namePrompt"), save.name === "???" ? "" : save.name);
       if (!newName || !newName.trim()) return;
+
       save.name = newName.trim();
       pushLiveLog(save, save.name);
       saveSave(save);
+
       showToast(`${T("nameToastPrefix")}${save.name}${T("nameToastSuffix")}`);
       render();
     }
@@ -1249,118 +2298,150 @@
     }
 
     function disableActions(disabled) {
-      [ui.btnFood, ui.btnOut, ui.btnStyle, ui.btnClean, ui.btnDrink, ui.btnMacaron]
-        .forEach(btn => { btn.disabled = disabled; });
+      [ui.btnFood, ui.btnOut, ui.btnStyle, ui.btnDrink, ui.btnClean, ui.btnMacaron]
+        .forEach(btn => btn.disabled = disabled);
     }
 
     function applyLanguage() {
-      ui.langSel.value             = getLang();
-      ui.brandTitle.textContent    = T("brandTitle");
-      ui.dayLabel.textContent      = T("dayLabel");
-      ui.sitterLabel.textContent   = T("sitter");
+      ui.langSel.value = getLang();
+
+      ui.brandTitle.textContent = T("brandTitle");
+      ui.dayLabel.textContent = T("dayLabel");
+      ui.sitterLabel.textContent = T("sitter");
       ui.charCardTitle.textContent = T("charCardTitle");
-      ui.commandTitle.textContent  = T("commandTitle");
-      ui.commandHint.textContent   = T("commandHint");
-      ui.foodGroupTitle.textContent= T("foodGroupTitle");
-      ui.playGroupTitle.textContent= T("playGroupTitle");
-      ui.careGroupTitle.textContent= T("careGroupTitle");
-      ui.btnFoodLabel.textContent  = T("btnFoodLabel");
-      ui.btnFoodSub.textContent    = T("btnFoodSub");
-      ui.btnOutLabel.textContent   = T("btnOutLabel");
-      ui.btnOutSub.textContent     = T("btnOutSub");
+      ui.commandTitle.textContent = T("commandTitle");
+      ui.commandHint.textContent = T("commandHint");
+      ui.foodGroupTitle.textContent = T("foodGroupTitle");
+      ui.playGroupTitle.textContent = T("playGroupTitle");
+      ui.careGroupTitle.textContent = T("careGroupTitle");
+
+      ui.btnFoodLabel.textContent = T("btnFoodLabel");
+      ui.btnFoodSub.textContent = T("btnFoodSub");
+      ui.btnOutLabel.textContent = T("btnOutLabel");
+      ui.btnOutSub.textContent = T("btnOutSub");
       ui.btnStyleLabel.textContent = T("btnStyleLabel");
-      ui.btnStyleSub.textContent   = T("btnStyleSub");
+      ui.btnStyleSub.textContent = T("btnStyleSub");
       ui.btnDrinkLabel.textContent = T("btnDrinkLabel");
-      ui.btnDrinkSub.textContent   = T("btnDrinkSub");
+      ui.btnDrinkSub.textContent = T("btnDrinkSub");
       ui.btnCleanLabel.textContent = T("btnCleanLabel");
-      ui.btnCleanSub.textContent   = T("btnCleanSub");
+      ui.btnCleanSub.textContent = T("btnCleanSub");
       ui.btnMacaronLabel.textContent = T("btnMacaronLabel");
-      ui.btnMacaronSub.textContent   = T("btnMacaronSub");
-      ui.btnName.textContent       = T("btnName");
-      ui.btnLogs.textContent       = T("btnLogs");
-      ui.btnReset.textContent      = T("btnReset");
+      ui.btnMacaronSub.textContent = T("btnMacaronSub");
+      ui.btnName.textContent = T("btnName");
+      ui.btnLogs.textContent = T("btnLogs");
+      ui.btnReset.textContent = T("btnReset");
+      ui.btnLetter.textContent = T("letterBtn");
+
       ui.surveyGateTitle.textContent = T("surveyGateTitle");
-      ui.surveyGateDesc.textContent  = T("surveyGateDesc");
-      ui.btnGoSurvey.textContent   = T("btnGoSurvey");
-      ui.btnLetter.textContent     = T("letterBtn");
-      ui.letterTitle.textContent   = T("letterTitle");
-      ui.btnLetterClose.textContent= T("letterClose");
-      ui.logsTitle.textContent     = T("logsTitle");
-      ui.btnLogsClose.textContent  = T("logsClose");
-      ui.poopTitle.textContent     = T("poopTitle");
-      ui.poopHint.textContent      = T("poopHint");
-      ui.btnPoopExit.textContent   = T("poopExit");
+      ui.surveyGateDesc.textContent = T("surveyGateDesc");
+      ui.btnGoSurvey.textContent = T("btnGoSurvey");
+
       ui.choiceModalTitle.textContent = T("choiceModalTitle");
-      ui.choiceModalDesc.textContent  = T("choiceModalDesc");
-      ui.btnChoiceClose.textContent   = T("choiceClose");
-      ui.thanksText.textContent    = T("thanks");
-      ui.thanksSub.textContent     = T("thanksSub");
+      ui.choiceModalDesc.textContent = T("choiceModalDesc");
+      ui.btnChoiceClose.textContent = T("choiceClose");
+
+      ui.letterTitle.textContent = T("letterTitle");
+      ui.btnLetterClose.textContent = T("letterClose");
+
+      ui.logsTitle.textContent = T("logsTitle");
+      ui.btnLogsClose.textContent = T("logsClose");
+
+      ui.poopTitle.textContent = T("poopTitle");
+      ui.poopHint.textContent = T("poopHint");
+      ui.btnPoopExit.textContent = T("poopExit");
+
+      ui.thanksText.textContent = T("thanks");
+      ui.thanksSub.textContent = T("thanksSub");
       ui.btnEndingLogs.textContent = T("endingLogs");
-      ui.btnEndingClose.textContent= T("endingClose");
+      ui.btnEndingClose.textContent = T("endingClose");
+
       render();
     }
 
     function render() {
       const save = loadSave();
       if (!save) return;
+
       const elapsed = calcElapsedMs(save);
       simulateNeeds(save);
       maybeDeliverLetter(save, elapsed);
       hatchIfNeeded(save, elapsed);
       updateDayBoundary(save, elapsed);
       maybeEnd(save, elapsed);
-      ui.dayNum.textContent      = save.day;
+
+      ui.dayNum.textContent = String(save.day);
       ui.sitterToggle.dataset.on = save.pausedSince ? "true" : "false";
+
       updateHeartDisplay(save);
       updateStatusPill(save);
-      updateCountdown(save);
       updateEntityDisplay(save);
       disableActions(save.ended || !save.hatched);
+
       saveSave(save);
     }
 
-    // Event listeners
-    ui.langSel.addEventListener("change", () => { setLang(ui.langSel.value); applyLanguage(); });
+    ui.langSel.addEventListener("change", () => {
+      setLang(ui.langSel.value);
+      applyLanguage();
+    });
+
     ui.btnGoSurvey.addEventListener("click", openSurveyPage);
-    ui.btnFood.addEventListener("click",   () => openChoiceModal("food"));
-    ui.btnOut.addEventListener("click",    () => openChoiceModal("out"));
-    ui.btnStyle.addEventListener("click",  () => openChoiceModal("style"));
-    ui.btnDrink.addEventListener("click",  actDrink);
-    ui.btnMacaron.addEventListener("click",actMacaron);
-    ui.btnClean.addEventListener("click",  startPoopGame);
+    ui.btnFood.addEventListener("click", () => openChoiceModal("food"));
+    ui.btnOut.addEventListener("click", () => openChoiceModal("out"));
+    ui.btnStyle.addEventListener("click", () => openChoiceModal("style"));
+    ui.btnDrink.addEventListener("click", actDrink);
+    ui.btnMacaron.addEventListener("click", actMacaron);
+    ui.btnClean.addEventListener("click", startPoopGame);
     ui.sitterToggle.addEventListener("click", toggleSitter);
-    ui.btnName.addEventListener("click",   changeName);
-    ui.btnReset.addEventListener("click",  resetGame);
-    ui.choiceLeft.addEventListener("click",  () => selectCurrentChoice(0));
+    ui.btnName.addEventListener("click", changeName);
+    ui.btnReset.addEventListener("click", resetGame);
+
+    ui.choiceLeft.addEventListener("click", () => selectCurrentChoice(0));
     ui.choiceRight.addEventListener("click", () => selectCurrentChoice(1));
     ui.btnChoiceClose.addEventListener("click", closeChoiceModal);
-    ui.btnLetter.addEventListener("click", () => openLetter(false));
+
+    ui.btnLetter.addEventListener("click", openLetter);
     ui.btnLetterClose.addEventListener("click", closeLetter);
-    ui.btnLogs.addEventListener("click",    openLogs);
+
+    ui.btnLogs.addEventListener("click", openLogs);
     ui.btnLogsClose.addEventListener("click", closeLogs);
-    ui.btnEndingLogs.addEventListener("click", () => { hideEnding(); openLogs(); });
-    ui.btnEndingClose.addEventListener("click", hideEnding);
+
     ui.btnPoopExit.addEventListener("click", endPoopGame);
+
+    ui.btnEndingLogs.addEventListener("click", () => {
+      hideEnding();
+      openLogs();
+    });
+
+    ui.btnEndingClose.addEventListener("click", hideEnding);
 
     [ui.choiceModal, ui.letterModal, ui.logsModal].forEach(modal => {
       modal.addEventListener("click", (e) => {
         if (e.target !== modal) return;
         if (modal === ui.choiceModal) closeChoiceModal();
         if (modal === ui.letterModal) closeLetter();
-        if (modal === ui.logsModal)   closeLogs();
+        if (modal === ui.logsModal) closeLogs();
       });
     });
 
-    // Init
     handleSurveyReturn();
+    applyBackground();
+
     let save = loadSave();
     if (!save) {
       save = createNewSave();
       pushLiveLog(save, "game start");
       saveSave(save);
     }
-    ui.surveyGate.classList.toggle("show", !isSurveyDone());
+
+    if (USE_SURVEY_GATE) {
+      ui.surveyGate.classList.toggle("show", !isSurveyDone());
+    } else {
+      ui.surveyGate.classList.remove("show");
+    }
+
     applyLanguage();
+    render();
     setInterval(render, 1000);
   })();
   </script>
