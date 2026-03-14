@@ -12,7 +12,6 @@
       --muted:rgba(238,242,255,.78);
       --line:rgba(255,255,255,.14);
       --card:rgba(255,255,255,.06);
-      --card-strong:rgba(255,255,255,.09);
       --shadow:0 16px 36px rgba(0,0,0,.34);
       --radius:20px;
       --accent1:#c4b5fd;
@@ -506,6 +505,7 @@
       color:var(--muted);
       text-align:center;
       line-height:1.5;
+      min-height:1.5em;
     }
 
     .toast{
@@ -580,12 +580,6 @@
       margin:0 0 10px;
       font-size:clamp(17px,4.2vw,22px);
       line-height:1.3;
-    }
-
-    .modalBox p,
-    .modalBox small{
-      color:var(--muted);
-      line-height:1.7;
     }
 
     .modalBtn{
@@ -719,48 +713,6 @@
       line-height:1.6;
     }
 
-    .surveyGate{
-      z-index:90;
-      background:
-        linear-gradient(180deg, rgba(5,8,22,.62), rgba(11,16,40,.88)),
-        var(--bg-image) center/cover no-repeat fixed,
-        linear-gradient(135deg, rgba(5,8,22,.98), rgba(11,16,40,.98));
-    }
-
-    .surveyPanel{
-      width:min(92vw, 520px);
-      padding:24px;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.05);
-      text-align:center;
-      box-shadow:var(--shadow);
-    }
-
-    .surveyPanel .icon{
-      font-size:48px;
-      margin-bottom:10px;
-      animation:bounce 1.2s ease infinite;
-    }
-
-    @keyframes bounce{
-      0%,100%{ transform:translateY(0) }
-      50%{ transform:translateY(-10px) }
-    }
-
-    .surveyPanel .title{
-      font-size:clamp(22px,5vw,30px);
-      font-weight:900;
-      margin-bottom:10px;
-    }
-
-    .surveyPanel .desc{
-      color:var(--muted);
-      line-height:1.8;
-      margin-bottom:18px;
-      font-size:14px;
-    }
-
     .endingScreen .thanks{
       font-size:clamp(30px,7vw,46px);
       font-weight:900;
@@ -825,7 +777,7 @@
         </div>
 
         <div class="pill toggle" id="sitterToggle" data-on="false" title="Sitter Mode">
-          <small id="sitterLabel">シッター</small>
+          <small>シッター</small>
           <div class="switch"></div>
         </div>
       </div>
@@ -860,7 +812,7 @@
                 <div class="entityMeta">
                   <div class="sleepStatus" id="sleepStatus">ふ化まで 60s</div>
                   <div class="growthNote" id="growthNote">マカロンは1分後に生まれます</div>
-                  
+                  <div class="smallNote" id="smallNote"></div>
                 </div>
               </div>
             </div>
@@ -943,15 +895,6 @@
     </div>
   </div>
 
-  <div class="surveyGate" id="surveyGate">
-    <div class="surveyPanel">
-      <div class="icon">📋</div>
-      <div class="title">ゲーム開始前に</div>
-      <div class="desc">アンケートに回答したあと、送信完了画面にあるリンクからこのゲームへ戻ります。</div>
-      <button id="btnGoSurvey" style="width:100%;">アンケートへ進む</button>
-    </div>
-  </div>
-
   <div class="modalOverlay" id="choiceModal">
     <div class="modalBox">
       <h2 id="choiceModalTitle">2択</h2>
@@ -1017,39 +960,47 @@
   (() => {
     "use strict";
 
-    /* 画像パスはここでまとめて管理 */
-    const ASSET_CANDIDATES = {
+    const PATHS = {
       background: [
         "./public/char/space_background .png",
         "./public/char/space_background.png",
+        "./public/space_background .png",
+        "./public/space_background.png",
         "./space_background .png",
         "./space_background.png"
       ],
-      macaron: [
+      macaronGreen: [
         "./public/char/macaron_green.png",
         "./public/macaron_green.png",
         "./macaron_green.png"
       ],
-      character: [
-        "./public/char/blue_closed.png",
-        "./public/blue_closed.png",
-        "./blue_closed.png"
+      greenOpen: [
+        "./public/char/green_open.png",
+        "./public/green_open.png",
+        "./green_open.png"
+      ],
+      greenClosed: [
+        "./public/char/green_closed.png",
+        "./public/green_closed.png",
+        "./green_closed.png"
+      ],
+      greenSleep: [
+        "./public/char/green_sleep.png",
+        "./public/green_sleep.png",
+        "./green_sleep.png"
       ]
     };
 
-    const RESOLVED_ASSETS = {
+    const RESOLVED = {
       background: null,
-      macaron: null,
-      character: null
+      macaronGreen: null,
+      greenOpen: null,
+      greenClosed: null,
+      greenSleep: null
     };
 
-    const SAVE_KEY = "tosewa_save_v8";
-    const USE_SURVEY_GATE = false;
-
-    const GIFT_SURVEY_DONE_KEY = "gift_survey_done";
-    const OSEWA_SURVEY_DONE_KEY = "osewa_survey_done_v1";
-
-    const HATCH_MS = 1 * 60 * 1000;
+    const SAVE_KEY = "tosewa_save_green_v1";
+    const HATCH_MS = 60 * 1000;
     const LETTER_ARRIVE_MS = 8 * 1000;
     const DAY_MS = 24 * 60 * 60 * 1000;
     const TOTAL_DAYS = 3;
@@ -1080,9 +1031,6 @@
       btnLogs: document.getElementById("btnLogs"),
       btnReset: document.getElementById("btnReset"),
       btnLetter: document.getElementById("btnLetter"),
-
-      surveyGate: document.getElementById("surveyGate"),
-      btnGoSurvey: document.getElementById("btnGoSurvey"),
 
       choiceModal: document.getElementById("choiceModal"),
       choiceModalTitle: document.getElementById("choiceModalTitle"),
@@ -1196,7 +1144,6 @@
         .replaceAll("'", "&#39;");
     }
 
-    /* 画像が存在するか確認して、最初に見つかったものを返す */
     function resolveFirstExisting(paths) {
       return new Promise((resolve) => {
         let index = 0;
@@ -1209,7 +1156,6 @@
 
           const path = paths[index];
           const img = new Image();
-
           img.onload = () => resolve(path);
           img.onerror = () => {
             index += 1;
@@ -1223,46 +1169,40 @@
     }
 
     async function prepareAssets() {
-      RESOLVED_ASSETS.background = await resolveFirstExisting(ASSET_CANDIDATES.background);
-      RESOLVED_ASSETS.macaron = await resolveFirstExisting(ASSET_CANDIDATES.macaron);
-      RESOLVED_ASSETS.character = await resolveFirstExisting(ASSET_CANDIDATES.character);
+      RESOLVED.background = await resolveFirstExisting(PATHS.background);
+      RESOLVED.macaronGreen = await resolveFirstExisting(PATHS.macaronGreen);
+      RESOLVED.greenOpen = await resolveFirstExisting(PATHS.greenOpen);
+      RESOLVED.greenClosed = await resolveFirstExisting(PATHS.greenClosed);
+      RESOLVED.greenSleep = await resolveFirstExisting(PATHS.greenSleep);
     }
 
     function applyBackground() {
-      const root = document.documentElement;
-      if (RESOLVED_ASSETS.background) {
-        root.style.setProperty("--bg-image", `url("${RESOLVED_ASSETS.background}")`);
+      if (RESOLVED.background) {
+        document.documentElement.style.setProperty("--bg-image", `url("${RESOLVED.background}")`);
       }
     }
 
     function createNewSave() {
       return {
-        v: 8,
         createdAt: new Date().toISOString(),
         ended: false,
         endedAt: null,
-
         hatched: false,
         letterArrived: false,
         letterOpened: false,
         letterAutoOpened: false,
-
         name: "???",
-
         heart: 5,
         hunger: 2,
         tired: 1,
         dirty: 1,
         mood: 0,
-
         day: 1,
         actionCount: 0,
         cursors: { food: 0, out: 0, style: 0 },
-
         choices: {},
         events: [],
         heartHistory: [{ t: 0, v: 5 }],
-
         pauseAccumMs: 0,
         pausedSince: null,
         sitterUsedMs: 0,
@@ -1311,26 +1251,6 @@
       }
     }
 
-    function isSurveyDone() {
-      return localStorage.getItem(GIFT_SURVEY_DONE_KEY) === "1" ||
-             localStorage.getItem(OSEWA_SURVEY_DONE_KEY) === "1";
-    }
-
-    function handleSurveyReturn() {
-      const url = new URL(location.href);
-      if (url.searchParams.get("survey") === "done") {
-        localStorage.setItem(GIFT_SURVEY_DONE_KEY, "1");
-        localStorage.setItem(OSEWA_SURVEY_DONE_KEY, "1");
-        url.searchParams.delete("survey");
-        history.replaceState({}, "", url.toString());
-        showToast("アンケートありがとう。ゲームを始めます。");
-      }
-    }
-
-    function openSurveyPage() {
-      location.href = "./survey.html";
-    }
-
     function getGrowthStage(save) {
       return Math.min(3, Math.floor((save.actionCount || 0) / 10));
     }
@@ -1349,8 +1269,16 @@
     }
 
     function getImageCandidates(save) {
-      if (!save.hatched) return [RESOLVED_ASSETS.macaron];
-      return [RESOLVED_ASSETS.character];
+      if (!save.hatched) {
+        return [RESOLVED.macaronGreen];
+      }
+      if (isNightTime()) {
+        return [RESOLVED.greenSleep, RESOLVED.greenClosed, RESOLVED.greenOpen];
+      }
+      if (isSick(save)) {
+        return [RESOLVED.greenClosed, RESOLVED.greenOpen];
+      }
+      return [RESOLVED.greenOpen, RESOLVED.greenClosed];
     }
 
     function setEntityImage(candidates) {
@@ -1417,47 +1345,48 @@
     }
 
     function updateEntityDisplay(save) {
-  setEntityImage(getImageCandidates(save));
-  ui.entityVisual.style.transform = `scale(${save.hatched ? getGrowthScale(save) : 0.92})`;
-  ui.entityVisual.classList.toggle("crying", save.hatched && isSick(save) && !isNightTime());
+      setEntityImage(getImageCandidates(save));
+      ui.entityVisual.style.transform = `scale(${save.hatched ? getGrowthScale(save) : 0.92})`;
+      ui.entityVisual.classList.toggle("crying", save.hatched && isSick(save) && !isNightTime());
 
-  if (!save.hatched) {
-    const remainSec = Math.max(0, Math.ceil((HATCH_MS - calcElapsedMs(save)) / 1000));
-    ui.entityBubble.style.display = "block";
-    ui.entityBubble.textContent = "どんな子かな？ ちょっと待ってね";
-    ui.sleepStatus.textContent = `ふ化まで ${remainSec}s`;
-    ui.growthNote.textContent = "マカロンは1分後に生まれます";
-    ui.charStatus.textContent = "マカロンが静かに待っている";
-    ui.smallNote.textContent = "携帯でも大きくなりすぎない文字サイズにしています";
-    return;
-  }
+      if (!save.hatched) {
+        const remainSec = Math.max(0, Math.ceil((HATCH_MS - calcElapsedMs(save)) / 1000));
+        ui.entityBubble.style.display = "block";
+        ui.entityBubble.textContent = "どんな子かな？ ちょっと待ってね";
+        ui.sleepStatus.textContent = `ふ化まで ${remainSec}s`;
+        ui.growthNote.textContent = "マカロンは1分後に生まれます";
+        ui.charStatus.textContent = "緑のマカロンが静かに待っている";
+        ui.smallNote.textContent = "";
+        return;
+      }
 
-  const growthNames = ["まだ小さい","少し育った","だいぶ育った","すっかり育った"];
-  const growthLabel = growthNames[getGrowthStage(save)];
-  ui.growthNote.textContent = `${save.actionCount}回えらんだ / ${growthLabel}`;
-  ui.smallNote.textContent = "状態は表情や動きで変わります";
+      const growthNames = ["まだ小さい","少し育った","だいぶ育った","すっかり育った"];
+      const growthLabel = growthNames[getGrowthStage(save)];
+      ui.growthNote.textContent = `${save.actionCount}回えらんだ / ${growthLabel}`;
+      ui.smallNote.textContent = "";
 
-  if (isNightTime()) {
-    ui.entityBubble.style.display = "block";
-    ui.entityBubble.textContent = "すやすや";
-    ui.sleepStatus.textContent = "夜なので眠っている";
-  } else if (isSick(save)) {
-    ui.entityBubble.style.display = "block";
-    ui.entityBubble.textContent = "ぽろぽろ";
-    ui.sleepStatus.textContent = "具合がよくなさそう";
-  } else {
-    ui.entityBubble.style.display = "none";
-    ui.entityBubble.textContent = "";
-    ui.sleepStatus.textContent = "起きている";
-  }
+      if (isNightTime()) {
+        ui.entityBubble.style.display = "block";
+        ui.entityBubble.textContent = "すやすや";
+        ui.sleepStatus.textContent = "夜なので眠っている";
+      } else if (isSick(save)) {
+        ui.entityBubble.style.display = "block";
+        ui.entityBubble.textContent = "ぽろぽろ";
+        ui.sleepStatus.textContent = "具合がよくなさそう";
+      } else {
+        ui.entityBubble.style.display = "none";
+        ui.entityBubble.textContent = "";
+        ui.sleepStatus.textContent = "起きている";
+      }
 
-  const statusLines = [];
-  if (save.hunger > 7) statusLines.push("おなかがすいていそう");
-  if (save.tired > 7) statusLines.push("少しつかれていそう");
-  if (save.dirty > 6) statusLines.push("そろそろそうじしたいかも");
-  if (!statusLines.length) statusLines.push("いっしょにいる");
-  ui.charStatus.textContent = statusLines.join(" / ");
-}
+      const statusLines = [];
+      if (save.hunger > 7) statusLines.push("おなかがすいていそう");
+      if (save.tired > 7) statusLines.push("少しつかれていそう");
+      if (save.dirty > 6) statusLines.push("そろそろそうじしたいかも");
+      if (!statusLines.length) statusLines.push("いっしょにいる");
+      ui.charStatus.textContent = statusLines.join(" / ");
+    }
+
     function maybeDeliverLetter(save, elapsed) {
       if (!save.letterArrived && elapsed >= LETTER_ARRIVE_MS) {
         save.letterArrived = true;
@@ -1478,9 +1407,9 @@
     function hatchIfNeeded(save, elapsed) {
       if (!save.hatched && elapsed >= HATCH_MS) {
         save.hatched = true;
-        pushLiveLog(save, "青い子が生まれた");
-        addChoice(save, "Hatch", "blue born");
-        showToast("マカロンが、その色の子になりました。");
+        pushLiveLog(save, "緑の子が生まれた");
+        addChoice(save, "Hatch", "green born");
+        showToast("マカロンが、緑の子になりました。");
       }
     }
 
@@ -1739,8 +1668,8 @@
       ui.letterContent.textContent =
 `見つけてくれたあなたへ
 
-この子は、マカロンの姿でやってきました。
-1分たつと、その色の子として生まれます。
+この子は、緑のマカロンの姿でやってきました。
+1分たつと、緑の子として生まれます。
 
 ごはんを選ぶこと。
 少しおでかけすること。
@@ -1889,7 +1818,6 @@
       saveSave(save);
     }
 
-    ui.btnGoSurvey.addEventListener("click", openSurveyPage);
     ui.btnFood.addEventListener("click", () => openChoiceModal("food"));
     ui.btnOut.addEventListener("click", () => openChoiceModal("out"));
     ui.btnStyle.addEventListener("click", () => openChoiceModal("style"));
@@ -1929,7 +1857,6 @@
     });
 
     async function init() {
-      handleSurveyReturn();
       await prepareAssets();
       applyBackground();
 
@@ -1938,12 +1865,6 @@
         save = createNewSave();
         pushLiveLog(save, "game start");
         saveSave(save);
-      }
-
-      if (USE_SURVEY_GATE) {
-        ui.surveyGate.classList.toggle("show", !isSurveyDone());
-      } else {
-        ui.surveyGate.classList.remove("show");
       }
 
       render();
