@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>432ON｜デジタルな存在との3日間のお世話体験</title>
+  <title>432ON｜ちいさな存在と、3日間</title>
   <style>
     *{
       box-sizing:border-box;
@@ -26,25 +26,34 @@
     }
 
     header{
-      padding:3.5rem 1.5rem 2.5rem;
+      padding:4rem 1.5rem 2.8rem;
       text-align:center;
       background:linear-gradient(135deg, #f8bbd0, #b2ebf2);
       color:#333;
       box-shadow:0 4px 12px rgba(0,0,0,0.08);
     }
 
-    header h1{
-      margin:0 0 1rem;
-      font-size:clamp(2rem, 4.8vw, 3rem);
-      letter-spacing:0.04em;
-      line-height:1.4;
+    .title{
+      margin:0;
+      font-size:clamp(2.4rem, 6vw, 4rem);
+      letter-spacing:0.08em;
+      line-height:1.2;
+      font-weight:700;
     }
 
-    header p{
-      margin:0 auto;
+    .subtitle{
+      margin-top:0.8rem;
+      font-size:clamp(1rem, 2.3vw, 1.35rem);
+      line-height:1.8;
+      letter-spacing:0.04em;
+      color:#4a5568;
+    }
+
+    .lead{
+      margin:1.6rem auto 0;
       max-width:820px;
-      font-size:1.08rem;
-      line-height:1.9;
+      font-size:1.05rem;
+      line-height:1.95;
     }
 
     @keyframes fadeInUp {
@@ -60,7 +69,7 @@
 
     main{
       width:min(920px, 92%);
-      margin:1.2rem auto 2rem;
+      margin:1.3rem auto 2rem;
       display:grid;
       gap:1.1rem;
     }
@@ -81,7 +90,7 @@
     h2{
       margin:0 0 0.8rem;
       color:#1976d2;
-      font-size:1.28rem;
+      font-size:1.2rem;
     }
 
     p{
@@ -123,18 +132,24 @@
 
     @media (max-width:640px){
       header{
-        padding:2.8rem 1rem 2rem;
+        padding:3rem 1rem 2.2rem;
       }
+
       section{
         padding:1.2rem;
+      }
+
+      .lead{
+        font-size:1rem;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>432ON<br>デジタルな存在との3日間のお世話体験</h1>
-    <p>
+    <h1 class="title">432ON</h1>
+    <div class="subtitle">ちいさな存在と、3日間</div>
+    <p class="lead">
       このページは、デジタルな存在との関わりのなかで、
       愛着、判断、同一性の感じ方を調べる研究のための体験ページです。<br>
       体験では、小さな存在を3日間見守りながら、
