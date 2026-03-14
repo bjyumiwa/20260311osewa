@@ -76,11 +76,25 @@
       align-items:center;
     }
 
-    .label{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:8px;
-      display:block;
+    .checkLine{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .checkLine input{
+      margin-top:3px;
+      transform:scale(1.2);
+    }
+
+    .divider{
+      height:1px;
+      background:rgba(255,255,255,.08);
+      margin:16px 0;
     }
 
     .mono{
@@ -92,7 +106,6 @@
       border-radius:12px;
       padding:12px 14px;
       line-height:1.7;
-      white-space:pre-wrap;
     }
 
     button{
@@ -127,33 +140,6 @@
 
     .ok{color:var(--ok);font-weight:800}
     .warn{color:var(--warn);font-weight:800}
-
-    .checkLine{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .checkLine input{
-      margin-top:3px;
-      transform:scale(1.2);
-    }
-
-    .mini{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.7;
-    }
-
-    .divider{
-      height:1px;
-      background:rgba(255,255,255,.08);
-      margin:16px 0;
-    }
   </style>
 </head>
 <body>
@@ -163,7 +149,7 @@
     <h1>研究同意と<br>事前アンケート</h1>
     <p>
       このページでは、研究について読んでいただき、同意のうえで Googleフォームの事前アンケートへ進みます。<br>
-      アンケート送信後は、ゲーム画面へ戻って開始します。
+      アンケート送信後は、Googleフォームの送信完了画面からゲームへ戻ってください。
     </p>
   </div>
 
@@ -190,26 +176,8 @@
 
   <div class="card">
     <h2>参加者ID</h2>
-    <div class="label">匿名のIDです。Googleフォームに自動入力されます。</div>
+    <p>匿名のIDです。Googleフォームに自動入力されます。</p>
     <div class="mono" id="pidBox"></div>
-  </div>
-
-  <div class="card">
-    <h2>Googleフォーム送信後に戻るURL</h2>
-    <div class="label">Googleフォームの「確認メッセージ」に、このURLを貼ってください。</div>
-    <div class="mono" id="returnUrlBox"></div>
-    <div class="row" style="margin-top:12px;">
-      <button id="btnCopyUrl">戻りURLをコピー</button>
-      <span class="mini">送信完了後、このURLからゲームが始まります。</span>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Googleフォームに入れる文の例</h2>
-    <div class="mono" id="messageExample"></div>
-    <div class="row" style="margin-top:12px;">
-      <button id="btnCopyMessage">メッセージ例をコピー</button>
-    </div>
   </div>
 
   <div class="card">
@@ -218,14 +186,14 @@
       <span id="status" class="warn">未同意</span>
     </div>
     <small style="margin-top:10px;display:block;">
-      Googleフォームは同じタブで開きます。送信後、確認メッセージのURLを押すとゲームへ戻ります。
+      Googleフォーム送信後は、フォームの確認メッセージに貼ったゲームURLを押して戻ってください。
     </small>
   </div>
 
   <div class="card">
     <h2>開発用</h2>
     <div class="row">
-      <button id="btnReset">同意・回答状態をリセット</button>
+      <button id="btnReset">同意状態をリセット</button>
     </div>
   </div>
 
@@ -235,17 +203,11 @@
 (() => {
   "use strict";
 
-  const GAME_URL = "./index.html";
   const FORM_URL_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSdKcqLBRLcGALdwYhWQFD1tuZtbqXyLpTBxfZZ9Or2pug16Rg/viewform";
   const ENTRY_PID = "entry.1425663825";
 
-  const GIFT_SURVEY_DONE_KEY = "gift_survey_done";
-  const GIFT_SURVEY_DONE_AT  = "gift_survey_done_at";
   const GIFT_SURVEY_PID_KEY  = "gift_pid";
-
-  const OSEWA_SURVEY_DONE_KEY = "osewa_survey_done_v1";
-  const OSEWA_SURVEY_DONE_AT  = "osewa_survey_done_at_v1";
-  const OSEWA_SURVEY_PID_KEY  = "osewa_pid_v1";
+  const OSEWA_SURVEY_PID_KEY = "osewa_pid_v1";
 
   const CONSENT_KEY = "osewa_consent_v1";
   const CONSENT_AT_KEY = "osewa_consent_at_v1";
@@ -253,10 +215,6 @@
   const ui = {
     agreeCheck: document.getElementById("agreeCheck"),
     pidBox: document.getElementById("pidBox"),
-    returnUrlBox: document.getElementById("returnUrlBox"),
-    messageExample: document.getElementById("messageExample"),
-    btnCopyUrl: document.getElementById("btnCopyUrl"),
-    btnCopyMessage: document.getElementById("btnCopyMessage"),
     btnGoForm: document.getElementById("btnGoForm"),
     btnReset: document.getElementById("btnReset"),
     status: document.getElementById("status")
@@ -285,18 +243,6 @@
     return v;
   }
 
-  function buildGameReturnUrl(){
-    const u = new URL(GAME_URL, location.href);
-    u.searchParams.set("survey", "done");
-    return u.toString();
-  }
-
-  function buildMessageExample(){
-    return `回答ありがとうございました。
-ゲームはこちらです：
-${buildGameReturnUrl()}`;
-  }
-
   function buildFormUrl(pid){
     const u = new URL(FORM_URL_BASE);
     u.searchParams.set("usp", "pp_url");
@@ -310,15 +256,6 @@ ${buildGameReturnUrl()}`;
     localStorage.setItem(CONSENT_AT_KEY, iso);
   }
 
-  function clearAll(){
-    localStorage.removeItem(CONSENT_KEY);
-    localStorage.removeItem(CONSENT_AT_KEY);
-    localStorage.removeItem(GIFT_SURVEY_DONE_KEY);
-    localStorage.removeItem(GIFT_SURVEY_DONE_AT);
-    localStorage.removeItem(OSEWA_SURVEY_DONE_KEY);
-    localStorage.removeItem(OSEWA_SURVEY_DONE_AT);
-  }
-
   function updateConsentUI(){
     const agreed = ui.agreeCheck.checked;
     ui.btnGoForm.disabled = !agreed;
@@ -326,31 +263,10 @@ ${buildGameReturnUrl()}`;
     ui.status.className = agreed ? "ok" : "warn";
   }
 
-  async function copyText(text, btn, doneLabel){
-    try{
-      await navigator.clipboard.writeText(text);
-      const old = btn.textContent;
-      btn.textContent = doneLabel;
-      setTimeout(() => btn.textContent = old, 1000);
-    }catch(_){
-      prompt("この内容をコピーしてください", text);
-    }
-  }
-
   const pid = getOrCreatePid();
   ui.pidBox.textContent = pid;
-  ui.returnUrlBox.textContent = buildGameReturnUrl();
-  ui.messageExample.textContent = buildMessageExample();
 
   ui.agreeCheck.addEventListener("change", updateConsentUI);
-
-  ui.btnCopyUrl.addEventListener("click", () => {
-    copyText(buildGameReturnUrl(), ui.btnCopyUrl, "コピーしました");
-  });
-
-  ui.btnCopyMessage.addEventListener("click", () => {
-    copyText(buildMessageExample(), ui.btnCopyMessage, "コピーしました");
-  });
 
   ui.btnGoForm.addEventListener("click", () => {
     if(!ui.agreeCheck.checked) return;
@@ -359,7 +275,8 @@ ${buildGameReturnUrl()}`;
   });
 
   ui.btnReset.addEventListener("click", () => {
-    clearAll();
+    localStorage.removeItem(CONSENT_KEY);
+    localStorage.removeItem(CONSENT_AT_KEY);
     ui.agreeCheck.checked = false;
     updateConsentUI();
   });
