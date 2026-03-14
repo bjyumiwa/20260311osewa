@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>3日間のお世話ゲーム</title>
+  <title>432ON｜ちいさな存在と、3日間</title>
   <style>
     :root{
       --bg0:#050816;
@@ -762,8 +762,8 @@
       <div class="brand">
         <div class="brandDot"></div>
         <div>
-          <div class="brandTitle">お世話ゲーム</div>
-          <div class="brandSub">Day <span id="dayNum">1</span> / 3</div>
+          <div class="brandTitle">432ON</div>
+          <div class="brandSub">ちいさな存在と、3日間 / Day <span id="dayNum">1</span> / 3</div>
         </div>
       </div>
 
@@ -948,6 +948,7 @@
       <div class="thanks">ありがとう</div>
       <div class="sub">3日間の記録だけが、静かに残ります。</div>
       <div class="modalBtn">
+        <button id="btnEndingSurvey">終了後アンケートへ</button>
         <button id="btnEndingLogs">ログを見る</button>
         <button id="btnEndingClose" class="btnGhost">閉じる</button>
       </div>
@@ -1006,6 +1007,9 @@
     const TOTAL_DAYS = 3;
     const POOP_COUNT_TARGET = 5;
 
+    // ここだけ、終了後アンケートのURLに置き換えてください
+    const END_SURVEY_URL = "ここに終了後アンケートのURL";
+
     const ui = {
       dayNum: document.getElementById("dayNum"),
       statusText: document.getElementById("statusText"),
@@ -1056,6 +1060,7 @@
       btnPoopExit: document.getElementById("btnPoopExit"),
 
       endingScreen: document.getElementById("endingScreen"),
+      btnEndingSurvey: document.getElementById("btnEndingSurvey"),
       btnEndingLogs: document.getElementById("btnEndingLogs"),
       btnEndingClose: document.getElementById("btnEndingClose"),
 
@@ -1438,6 +1443,14 @@
 
     function hideEnding() {
       ui.endingScreen.classList.remove("show");
+    }
+
+    function openEndSurvey() {
+      if (!END_SURVEY_URL || END_SURVEY_URL === "ここに終了後アンケートのURL") {
+        showToast("終了後アンケートのURLを入れてください。");
+        return;
+      }
+      window.open(END_SURVEY_URL, "_blank", "noopener,noreferrer");
     }
 
     function simulateNeeds(save) {
@@ -1839,6 +1852,8 @@
     ui.btnLogsClose.addEventListener("click", closeLogs);
 
     ui.btnPoopExit.addEventListener("click", endPoopGame);
+
+    ui.btnEndingSurvey.addEventListener("click", openEndSurvey);
 
     ui.btnEndingLogs.addEventListener("click", () => {
       hideEnding();
